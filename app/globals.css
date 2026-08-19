@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: #f7f8fa;
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  color: #172026;
+  background: #f7f8fa;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+@layer components {
+  .field {
+    @apply flex flex-col gap-1.5 text-sm font-medium text-ink;
+  }
+
+  .input {
+    @apply h-10 rounded-md border border-line bg-white px-3 text-sm text-ink outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100;
+  }
+
+  .textarea {
+    @apply min-h-20 rounded-md border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100;
+  }
+
+  .btn {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold transition disabled:opacity-60;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand-600 text-white hover:bg-brand-700;
+  }
+
+  .btn-secondary {
+    @apply btn border border-line bg-white text-ink hover:bg-paper;
+  }
+
+  .btn-danger {
+    @apply btn bg-danger text-white hover:brightness-95;
+  }
+
+  .panel {
+    @apply rounded-lg border border-line bg-white p-4 shadow-sm;
+  }
+
+  .table-head {
+    @apply border-b border-line bg-paper text-left text-xs font-semibold uppercase tracking-normal text-muted;
+  }
+
+  .table-cell {
+    @apply border-b border-line px-4 py-3 text-sm;
+  }
+}
