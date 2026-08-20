@@ -5,6 +5,8 @@ import { createServerSupabaseClient } from "@/lib/supabase";
 import { signOut } from "@/lib/actions";
 import { hasSupabaseEnv } from "@/lib/env";
 import { SetupRequired } from "@/components/setup-required";
+import { DevTools } from "@/components/dev-tools";
+
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -107,6 +109,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       <main className="lg:pl-64">
         <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">{children}</div>
       </main>
+      <DevTools />
     </div>
   );
 }

@@ -37,9 +37,17 @@ export function SaleBuilder({ products, customers }: { products: Product[]; cust
   const [items, setItems] = useState<SaleItem[]>([]);
   const [productId, setProductId] = useState("");
   const [query, setQuery] = useState("");
-  const [discount, setDiscount] = useState(0);
-  const [amountPaid, setAmountPaid] = useState(0);
+  const [discount, setDiscount] = useState("");
+  const [amountPaid, setAmountPaid] = useState("");
   const today = new Date().toISOString().slice(0, 10);
+
+  const cleanNumberInput = (val: string) => {
+    if (val === "") return "";
+    if (/^0\d+/.test(val)) {
+      return val.replace(/^0+/, "");
+    }
+    return val;
+  };
 
   const filteredProducts = useMemo(() => {
     const term = query.trim().toLowerCase();
@@ -54,10 +62,13 @@ export function SaleBuilder({ products, customers }: { products: Product[]; cust
       .slice(0, 25);
   }, [products, query]);
 
+  const discountNum = Number(discount || 0);
+  const amountPaidNum = Number(amountPaid || 0);
+
   const subtotal = items.reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
-  const total = Math.max(subtotal - discount, 0);
-  const remaining = Math.max(total - amountPaid, 0);
-  const status = paymentStatus(total, Math.min(amountPaid, total));
+  const total = Math.max(subtotal - discountNum, 0);
+  const remaining = Math.max(total - amountPaidNum, 0);
+  const status = paymentStatus(total, Math.min(amountPaidNum, total));
   const payload = items.map((item) => ({
     product_id: item.product_id,
     quantity: item.quantity,
@@ -231,7 +242,7 @@ export function SaleBuilder({ products, customers }: { products: Product[]; cust
             className="input"
             min="0"
             name="discount"
-            onChange={(event) => setDiscount(Number(event.target.value))}
+            onChange={(event) => setDiscount(cleanNumberInput(event.target.value))}
             step="0.01"
             type="number"
             value={discount}
@@ -245,7 +256,7 @@ export function SaleBuilder({ products, customers }: { products: Product[]; cust
             max={total}
             min="0"
             name="amount_paid"
-            onChange={(event) => setAmountPaid(Number(event.target.value))}
+            onChange={(event) => setAmountPaid(cleanNumberInput(event.target.value))}
             step="0.01"
             type="number"
             value={amountPaid}

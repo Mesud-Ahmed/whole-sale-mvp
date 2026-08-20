@@ -47,19 +47,19 @@ export function ProductForm({ product }: { product?: Product }) {
 
       <label className="field">
         Purchase price
-        <input className="input" defaultValue={String(product?.purchase_price ?? 0)} min="0" name="purchase_price" required step="0.01" type="number" />
+        <input className="input" defaultValue={product?.purchase_price !== undefined && product?.purchase_price !== null ? String(product.purchase_price) : ""} min="0" name="purchase_price" required step="0.01" type="number" />
       </label>
 
       <label className="field">
         Selling price
-        <input className="input" defaultValue={String(product?.selling_price ?? 0)} min="0" name="selling_price" required step="0.01" type="number" />
+        <input className="input" defaultValue={product?.selling_price !== undefined && product?.selling_price !== null ? String(product.selling_price) : ""} min="0" name="selling_price" required step="0.01" type="number" />
       </label>
 
       <label className="field">
         {editing ? "Current quantity" : "Initial quantity"}
         <input
           className="input"
-          defaultValue={String(product?.current_quantity ?? 0)}
+          defaultValue={product?.current_quantity !== undefined && product?.current_quantity !== null ? String(product.current_quantity) : ""}
           disabled={editing}
           min="0"
           name="current_quantity"
@@ -71,7 +71,7 @@ export function ProductForm({ product }: { product?: Product }) {
 
       <label className="field">
         Minimum stock
-        <input className="input" defaultValue={String(product?.minimum_stock ?? 0)} min="0" name="minimum_stock" required step="0.01" type="number" />
+        <input className="input" defaultValue={product?.minimum_stock !== undefined && product?.minimum_stock !== null ? String(product.minimum_stock) : ""} min="0" name="minimum_stock" required step="0.01" type="number" />
       </label>
 
       <div className="flex items-center gap-3 sm:col-span-2">

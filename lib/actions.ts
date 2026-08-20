@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase";
 import { toNumber } from "@/lib/utils";
+import { seedDemoData, clearDemoData } from "@/lib/seed";
 
 export type FormState = { ok: boolean; message: string } | null;
 
@@ -48,7 +49,13 @@ export async function signIn(_: FormState, formData: FormData): Promise<FormStat
   const password = String(formData.get("password") ?? "");
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return formError("Invalid email or password.");
+  if (error) {
+    console.error('signIn error', { email, error });
+    if (error.message.includes("Email not confirmed")) {
+      return formError("Email not confirmed. Please check your inbox.");
+    }
+    return formError("Invalid email or password.");
+  }
   redirect("/dashboard");
 }
 
@@ -57,8 +64,17 @@ export async function signUp(_: FormState, formData: FormData): Promise<FormStat
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
 
-  const { error } = await supabase.auth.signUp({ email, password });
-  if (error) return formError(error.message);
+  const { data, error } = await supabase.auth.signUp({ email, password });
+  if (error) {
+    console.error('signUp error', { email, error });
+    return formError(error.message);
+  }
+  
+  if (data?.session === null) {
+    return { ok: true, message: "Signup successful! Please check your email to confirm your account." };
+  }
+
+  console.info('signUp success', { email, user: data?.user?.id });
   redirect("/dashboard");
 }
 
@@ -249,4 +265,44 @@ export async function recordPayment(_: FormState, formData: FormData): Promise<F
   revalidatePath("/sales");
   revalidatePath("/dashboard");
   return { ok: true, message: "Payment recorded." };
+}
+
+export async function seedDemoDataAction(): Promise<FormState> {
+  const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return formError("Not authenticated.");
+  }
+  try {
+    await seedDemoData(supabase, user.id);
+    revalidatePath("/dashboard");
+    revalidatePath("/products");
+    revalidatePath("/customers");
+    revalidatePath("/sales");
+    revalidatePath("/payments");
+    return { ok: true, message: "Demo data seeded successfully!" };
+  } catch (error) {
+    console.error("Seeding action failed:", error);
+    return formError(error instanceof Error ? error.message : "Seeding failed.");
+  }
+}
+
+export async function clearDemoDataAction(): Promise<FormState> {
+  const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return formError("Not authenticated.");
+  }
+  try {
+    await clearDemoData(supabase, user.id);
+    revalidatePath("/dashboard");
+    revalidatePath("/products");
+    revalidatePath("/customers");
+    revalidatePath("/sales");
+    revalidatePath("/payments");
+    return { ok: true, message: "Demo data cleared successfully!" };
+  } catch (error) {
+    console.error("Clearing action failed:", error);
+    return formError(error instanceof Error ? error.message : "Clearing failed.");
+  }
 }
