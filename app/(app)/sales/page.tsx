@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { createServerSupabaseClient } from "@/lib/supabase";
 import { formatDate, formatEtb } from "@/lib/utils";
+import { getDictionary } from "@/lib/i18n/server";
 
 export default async function SalesPage({
   searchParams
@@ -11,6 +12,7 @@ export default async function SalesPage({
 }) {
   const params = (await searchParams) ?? {};
   const supabase = await createServerSupabaseClient();
+  const { t } = await getDictionary();
 
   let query = supabase
     .from("sales")
@@ -37,40 +39,40 @@ export default async function SalesPage({
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-ink">Sales</h1>
-          <p className="text-sm text-muted">Review sales and payment status.</p>
+          <h1 className="text-2xl font-bold text-ink">{t("sale_title")}</h1>
+          <p className="text-sm text-muted">{t("sale_subtitle")}</p>
         </div>
         <Link className="btn-primary" href="/sales/new">
-          New Sale
+          {t("sale_new")}
         </Link>
       </div>
 
       <section className="panel">
         <form className="mb-4 grid gap-3 lg:grid-cols-[1fr_160px_160px_160px_auto]" method="get">
           <label className="field">
-            Customer
-            <input className="input" defaultValue={params.customer ?? ""} name="customer" placeholder="Customer name" />
+            {t("sale_customer_filter")}
+            <input className="input" defaultValue={params.customer ?? ""} name="customer" placeholder={t("sale_customer_placeholder")} />
           </label>
           <label className="field">
-            From
+            {t("sale_from")}
             <input className="input" defaultValue={params.from ?? ""} name="from" type="date" />
           </label>
           <label className="field">
-            To
+            {t("sale_to")}
             <input className="input" defaultValue={params.to ?? ""} name="to" type="date" />
           </label>
           <label className="field">
-            Status
+            {t("sale_status")}
             <select className="input" defaultValue={params.status ?? ""} name="status">
-              <option value="">All</option>
-              <option value="PAID">Paid</option>
-              <option value="PARTIAL">Partial</option>
-              <option value="CREDIT">Credit</option>
+              <option value="">{t("sale_all")}</option>
+              <option value="PAID">{t("sale_paid")}</option>
+              <option value="PARTIAL">{t("sale_partial")}</option>
+              <option value="CREDIT">{t("sale_credit")}</option>
             </select>
           </label>
           <div className="flex items-end">
             <button className="btn-secondary w-full" type="submit">
-              Filter
+              {t("action_filter")}
             </button>
           </div>
         </form>
@@ -78,26 +80,29 @@ export default async function SalesPage({
         {filtered.length ? (
           <div className="overflow-hidden rounded-lg border border-line">
             <div className="hidden table-head grid-cols-6 px-4 py-3 lg:grid">
-              <span>Sale ID</span>
-              <span>Date</span>
-              <span>Customer</span>
-              <span>Total</span>
-              <span>Remaining</span>
-              <span>Status</span>
+              <span>{t("sale_id")}</span>
+              <span>{t("sale_date")}</span>
+              <span>{t("sale_customer_filter")}</span>
+              <span>{t("sale_total")}</span>
+              <span>{t("sale_remaining")}</span>
+              <span>{t("sale_status")}</span>
             </div>
             <div className="divide-y divide-line">
               {filtered.map((sale) => {
                 const customer = Array.isArray(sale.customers) ? sale.customers[0] : sale.customers;
                 const remaining = Math.max(Number(sale.total_amount) - Number(sale.amount_paid), 0);
+                
+                const statusKey = sale.payment_status === "PAID" ? "sale_paid" : sale.payment_status === "PARTIAL" ? "sale_partial" : "sale_credit";
+
                 return (
                   <Link className="grid gap-2 p-4 text-sm hover:bg-paper lg:grid-cols-6" href={`/sales/${sale.id}`} key={sale.id}>
                     <span className="font-mono text-xs">{sale.id.slice(0, 8)}</span>
                     <span>{formatDate(sale.sale_date)}</span>
-                    <span className="font-semibold">{customer?.name ?? "Walk-in customer"}</span>
+                    <span className="font-semibold">{customer?.name ?? t("dash_walk_in")}</span>
                     <span>{formatEtb(sale.total_amount)}</span>
                     <span>{formatEtb(remaining)}</span>
                     <Badge tone={sale.payment_status === "PAID" ? "green" : sale.payment_status === "PARTIAL" ? "amber" : "red"}>
-                      {sale.payment_status}
+                      {t(statusKey)}
                     </Badge>
                   </Link>
                 );
@@ -105,7 +110,7 @@ export default async function SalesPage({
             </div>
           </div>
         ) : (
-          <EmptyState title="No sales recorded yet." action={<Link className="btn-primary" href="/sales/new">Record first sale</Link>} />
+          <EmptyState title={t("sale_no_sales")} action={<Link className="btn-primary" href="/sales/new">{t("dash_record_first_sale")}</Link>} />
         )}
       </section>
     </div>

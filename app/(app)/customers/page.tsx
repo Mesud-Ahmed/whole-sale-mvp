@@ -4,6 +4,7 @@ import { CustomerForm } from "@/components/forms/customer-form";
 import { EmptyState } from "@/components/ui/empty-state";
 import { createServerSupabaseClient } from "@/lib/supabase";
 import { formatEtb } from "@/lib/utils";
+import { getDictionary } from "@/lib/i18n/server";
 
 export default async function CustomersPage({
   searchParams
@@ -13,6 +14,7 @@ export default async function CustomersPage({
   const params = (await searchParams) ?? {};
   const search = (params.search ?? "").toLowerCase();
   const supabase = await createServerSupabaseClient();
+  const { t } = await getDictionary();
 
   const { data: customers } = await supabase
     .from("customer_balances")
@@ -31,27 +33,27 @@ export default async function CustomersPage({
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-ink">Customers</h1>
-        <p className="text-sm text-muted">Track customers and outstanding balances.</p>
+        <h1 className="text-2xl font-bold text-ink">{t("cust_title")}</h1>
+        <p className="text-sm text-muted">{t("cust_subtitle")}</p>
       </div>
 
       <section className="panel" id="add-customer">
-        <h2 className="mb-4 text-base font-bold">Add Customer</h2>
+        <h2 className="mb-4 text-base font-bold">{t("cust_add")}</h2>
         <CustomerForm />
       </section>
 
       <section className="panel">
         <form className="mb-4 grid gap-3 sm:grid-cols-[1fr_auto]" method="get">
           <label className="field">
-            Search
+            {t("cust_search")}
             <span className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-              <input className="input w-full pl-9" defaultValue={params.search ?? ""} name="search" placeholder="Name, business, or phone" />
+              <input className="input w-full pl-9" defaultValue={params.search ?? ""} name="search" placeholder={t("cust_search_placeholder")} />
             </span>
           </label>
           <div className="flex items-end">
             <button className="btn-secondary w-full" type="submit">
-              Search
+              {t("cust_search")}
             </button>
           </div>
         </form>
@@ -59,10 +61,10 @@ export default async function CustomersPage({
         {filtered.length ? (
           <div className="overflow-hidden rounded-lg border border-line">
             <div className="hidden table-head grid-cols-4 px-4 py-3 md:grid">
-              <span>Customer</span>
-              <span>Business</span>
-              <span>Phone</span>
-              <span>Outstanding</span>
+              <span>{t("cust_name")}</span>
+              <span>{t("cust_business")}</span>
+              <span>{t("cust_phone")}</span>
+              <span>{t("cust_outstanding")}</span>
             </div>
             <div className="divide-y divide-line">
               {filtered.map((customer) => (
@@ -78,7 +80,7 @@ export default async function CustomersPage({
             </div>
           </div>
         ) : (
-          <EmptyState title="No customers yet. Add your first customer." />
+          <EmptyState title={t("cust_add_first")} />
         )}
       </section>
     </div>

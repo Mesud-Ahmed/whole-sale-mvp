@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { FormMessage } from "@/components/ui/form-message";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { saveCustomer } from "@/lib/actions";
+import { useTranslation } from "@/lib/i18n/context";
 
 type Customer = {
   id?: string;
@@ -15,6 +16,7 @@ type Customer = {
 
 export function CustomerForm({ customer }: { customer?: Customer }) {
   const [state, formAction] = useActionState(saveCustomer, null);
+  const { t } = useTranslation();
   const editing = Boolean(customer?.id);
 
   return (
@@ -22,27 +24,27 @@ export function CustomerForm({ customer }: { customer?: Customer }) {
       {customer?.id ? <input name="id" type="hidden" value={customer.id} /> : null}
 
       <label className="field">
-        Customer name
+        {t("cust_name")}
         <input className="input" defaultValue={customer?.name ?? ""} name="name" required />
       </label>
 
       <label className="field">
-        Phone
+        {t("cust_phone")}
         <input className="input" defaultValue={customer?.phone ?? ""} name="phone" />
       </label>
 
       <label className="field">
-        Business name
+        {t("cust_business")}
         <input className="input" defaultValue={customer?.business_name ?? ""} name="business_name" />
       </label>
 
       <label className="field">
-        Address
+        {t("cust_address")}
         <input className="input" defaultValue={customer?.address ?? ""} name="address" />
       </label>
 
       <div className="flex items-center gap-3 sm:col-span-2">
-        <SubmitButton>{editing ? "Save Customer" : "Add Customer"}</SubmitButton>
+        <SubmitButton>{editing ? t("cust_save") : t("cust_add")}</SubmitButton>
         <FormMessage state={state} />
       </div>
     </form>

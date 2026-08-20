@@ -6,21 +6,23 @@ import { signOut } from "@/lib/actions";
 import { hasSupabaseEnv } from "@/lib/env";
 import { SetupRequired } from "@/components/setup-required";
 import { DevTools } from "@/components/dev-tools";
+import { getDictionary } from "@/lib/i18n/server";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { DictionaryKey } from "@/lib/i18n/dictionaries";
 
-
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/products", label: "Products", icon: Package },
-  { href: "/customers", label: "Customers", icon: Users },
-  { href: "/sales", label: "Sales", icon: ReceiptText },
-  { href: "/payments", label: "Payments", icon: WalletCards }
+const navItems: { href: string; labelKey: DictionaryKey; icon: any }[] = [
+  { href: "/dashboard", labelKey: "nav_dashboard", icon: LayoutDashboard },
+  { href: "/products", labelKey: "nav_products", icon: Package },
+  { href: "/customers", labelKey: "nav_customers", icon: Users },
+  { href: "/sales", labelKey: "nav_sales", icon: ReceiptText },
+  { href: "/payments", labelKey: "nav_payments", icon: WalletCards }
 ];
 
-const quickActions = [
-  { href: "/products#add-product", label: "Add Product" },
-  { href: "/customers#add-customer", label: "Add Customer" },
-  { href: "/sales/new", label: "New Sale" },
-  { href: "/payments#record-payment", label: "Record Payment" }
+const quickActions: { href: string; labelKey: DictionaryKey }[] = [
+  { href: "/products#add-product", labelKey: "prod_add" },
+  { href: "/customers#add-customer", labelKey: "cust_add" },
+  { href: "/sales/new", labelKey: "sale_new" },
+  { href: "/payments#record-payment", labelKey: "pay_record" }
 ];
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
@@ -32,10 +34,12 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
+  
+  const { t } = await getDictionary();
 
   return (
     <div className="min-h-screen bg-paper">
-      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-line bg-white px-4 py-5 lg:block">
+      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-line bg-white px-4 py-5 lg:flex">
         <Link className="block text-lg font-bold text-ink" href="/dashboard">
           Wholesale MVP
         </Link>
@@ -51,13 +55,13 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
                 key={item.href}
               >
                 <Icon className="h-4 w-4" />
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             );
           })}
         </nav>
 
-        <div className="mt-8 space-y-2">
+        <div className="mt-8 flex-1 space-y-2">
           <p className="px-3 text-xs font-semibold uppercase tracking-normal text-muted">Quick actions</p>
           {quickActions.map((action) => (
             <Link
@@ -66,35 +70,44 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
               key={action.href}
             >
               <Plus className="h-4 w-4" />
-              {action.label}
+              {t(action.labelKey)}
             </Link>
           ))}
         </div>
-
-        <form action={signOut} className="absolute bottom-5 left-4 right-4">
-          <button className="btn-secondary w-full" type="submit">
-            <LogOut className="h-4 w-4" />
-            Logout
-          </button>
-        </form>
+        
+        <div className="mt-4 space-y-3">
+          <LanguageSwitcher />
+          
+          <form action={signOut} className="w-full">
+            <button className="btn-secondary w-full" type="submit">
+              <LogOut className="h-4 w-4 shrink-0" />
+              {t("nav_logout")}
+            </button>
+          </form>
+        </div>
       </aside>
 
-      <header className="sticky top-0 z-20 border-b border-line bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
+      <header className="sticky top-0 z-20 flex flex-col gap-3 border-b border-line bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
         <div className="flex items-center justify-between gap-3">
           <Link className="text-base font-bold" href="/dashboard">
             Wholesale MVP
           </Link>
-          <Link className="btn-primary h-9 px-3" href="/sales/new">
-            <Plus className="h-4 w-4" />
-            Sale
-          </Link>
+          <div className="flex items-center gap-2">
+            <div className="w-24">
+              <LanguageSwitcher />
+            </div>
+            <Link className="btn-primary h-9 px-3" href="/sales/new">
+              <Plus className="h-4 w-4" />
+              {t("sale_new")}
+            </Link>
+          </div>
         </div>
-        <nav className="mt-3 grid grid-cols-5 gap-1">
+        <nav className="grid grid-cols-5 gap-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
               <Link
-                aria-label={item.label}
+                aria-label={t(item.labelKey)}
                 className="flex h-10 items-center justify-center rounded-md text-slate-700 hover:bg-paper"
                 href={item.href}
                 key={item.href}
