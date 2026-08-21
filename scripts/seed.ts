@@ -35,7 +35,7 @@ const askQuestion = (query: string): Promise<string> => {
     rl.question(query, (ans) => {
       rl.close();
       resolve(ans);
-    })
+    }),
   );
 };
 
@@ -47,7 +47,9 @@ async function main() {
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!rawUrl || !anonKey) {
-    console.error("Error: Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY in .env file.");
+    console.error(
+      "Error: Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY in .env file.",
+    );
     process.exit(1);
   }
 
@@ -55,7 +57,7 @@ async function main() {
   let url = rawUrl;
   try {
     url = new URL(rawUrl).origin;
-  } catch (e) {
+  } catch {
     console.error("Error: Invalid NEXT_PUBLIC_SUPABASE_URL format.");
     process.exit(1);
   }
@@ -63,7 +65,7 @@ async function main() {
   const supabase = createClient(url, anonKey, {
     auth: {
       persistSession: false,
-    }
+    },
   });
 
   // Read credentials from env or prompt user
@@ -83,10 +85,11 @@ async function main() {
   }
 
   console.log(`Authenticating as ${email}...`);
-  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  const { data: authData, error: authError } =
+    await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
   if (authError) {
     console.error("Authentication failed:", authError.message);
@@ -100,13 +103,14 @@ async function main() {
   }
 
   console.log("Authentication successful! User ID:", userId);
-  
+
   try {
     await seedDemoData(supabase, userId);
     console.log("SUCCESS: Seeding completed successfully!");
     process.exit(0);
-  } catch (seedError: any) {
-    console.error("Error seeding data:", seedError.message || seedError);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Error seeding data:", message);
     process.exit(1);
   }
 }

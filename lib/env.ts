@@ -14,7 +14,7 @@ export function getSupabaseEnv() {
     const parsed = new URL(raw);
     const url = parsed.origin;
     return { url, anonKey };
-  } catch (err) {
+  } catch {
     throw new Error(
       "Invalid NEXT_PUBLIC_SUPABASE_URL: must be a full URL, e.g. https://xyz.supabase.co",
     );

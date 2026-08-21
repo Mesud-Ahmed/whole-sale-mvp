@@ -1,6 +1,15 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { LayoutDashboard, Package, Users, ReceiptText, WalletCards, Plus, LogOut } from "lucide-react";
+import {
+  LayoutDashboard,
+  Package,
+  Users,
+  ReceiptText,
+  WalletCards,
+  Plus,
+  LogOut,
+  type LucideIcon,
+} from "lucide-react";
 import { createServerSupabaseClient } from "@/lib/supabase";
 import { signOut } from "@/lib/actions";
 import { hasSupabaseEnv } from "@/lib/env";
@@ -10,19 +19,20 @@ import { getDictionary } from "@/lib/i18n/server";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { DictionaryKey } from "@/lib/i18n/dictionaries";
 
-const navItems: { href: string; labelKey: DictionaryKey; icon: any }[] = [
-  { href: "/dashboard", labelKey: "nav_dashboard", icon: LayoutDashboard },
-  { href: "/products", labelKey: "nav_products", icon: Package },
-  { href: "/customers", labelKey: "nav_customers", icon: Users },
-  { href: "/sales", labelKey: "nav_sales", icon: ReceiptText },
-  { href: "/payments", labelKey: "nav_payments", icon: WalletCards }
-];
+const navItems: { href: string; labelKey: DictionaryKey; icon: LucideIcon }[] =
+  [
+    { href: "/dashboard", labelKey: "nav_dashboard", icon: LayoutDashboard },
+    { href: "/products", labelKey: "nav_products", icon: Package },
+    { href: "/customers", labelKey: "nav_customers", icon: Users },
+    { href: "/sales", labelKey: "nav_sales", icon: ReceiptText },
+    { href: "/payments", labelKey: "nav_payments", icon: WalletCards },
+  ];
 
 const quickActions: { href: string; labelKey: DictionaryKey }[] = [
   { href: "/products#add-product", labelKey: "prod_add" },
   { href: "/customers#add-customer", labelKey: "cust_add" },
   { href: "/sales/new", labelKey: "sale_new" },
-  { href: "/payments#record-payment", labelKey: "pay_record" }
+  { href: "/payments#record-payment", labelKey: "pay_record" },
 ];
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
@@ -30,11 +40,11 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
 
   const supabase = await createServerSupabaseClient();
   const {
-    data: { user }
+    data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
-  
+
   const { t } = await getDictionary();
 
   return (
@@ -43,7 +53,9 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         <Link className="block text-lg font-bold text-ink" href="/dashboard">
           Wholesale MVP
         </Link>
-        <p className="mt-1 text-xs text-muted">Business tools for daily sales</p>
+        <p className="mt-1 text-xs text-muted">
+          Business tools for daily sales
+        </p>
 
         <nav className="mt-8 flex flex-col gap-1">
           {navItems.map((item) => {
@@ -62,7 +74,9 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="mt-8 flex-1 space-y-2">
-          <p className="px-3 text-xs font-semibold uppercase tracking-normal text-muted">Quick actions</p>
+          <p className="px-3 text-xs font-semibold uppercase tracking-normal text-muted">
+            Quick actions
+          </p>
           {quickActions.map((action) => (
             <Link
               className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-brand-700 hover:bg-brand-50"
@@ -74,10 +88,10 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
             </Link>
           ))}
         </div>
-        
+
         <div className="mt-4 space-y-3">
           <LanguageSwitcher />
-          
+
           <form action={signOut} className="w-full">
             <button className="btn-secondary w-full" type="submit">
               <LogOut className="h-4 w-4 shrink-0" />
@@ -120,7 +134,9 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       </header>
 
       <main className="lg:pl-64">
-        <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">{children}</div>
+        <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+          {children}
+        </div>
       </main>
       <DevTools />
     </div>

@@ -9,14 +9,14 @@ export const dictionaries = {
     nav_sales: "Sales",
     nav_payments: "Payments",
     nav_logout: "Logout",
-    
+
     // Common Actions
     action_save: "Save",
     action_cancel: "Cancel",
     action_edit: "Edit",
     action_delete: "Delete",
     action_view_all: "View all",
-    
+
     // Dashboard
     dash_title: "Dashboard",
     dash_subtitle: "Today's business at a glance.",
@@ -33,7 +33,7 @@ export const dictionaries = {
     dash_all_stock_good: "All products are above minimum stock.",
     dash_remaining: "remaining",
     dash_walk_in: "Walk-in customer",
-    
+
     // Products
     prod_title: "Products",
     prod_subtitle: "Manage your inventory",
@@ -70,7 +70,7 @@ export const dictionaries = {
     stock_decrease: "Decrease",
     stock_reason_placeholder: "Optional reason",
     stock_adjust_btn: "Adjust",
-    
+
     // Customers
     cust_title: "Customers",
     cust_subtitle: "Manage your clients",
@@ -88,7 +88,7 @@ export const dictionaries = {
     cust_add_first: "No customers yet. Add your first customer.",
     cust_outstanding: "Outstanding",
     cust_save: "Save Customer",
-    
+
     // Sales
     sale_title: "Sales",
     sale_subtitle: "Manage your sales",
@@ -125,7 +125,7 @@ export const dictionaries = {
     sale_unit_price: "Unit price",
     sale_credit_warning: "Select a customer for partial or credit sales.",
     sale_only_avail: "available",
-    
+
     // Payments
     pay_title: "Payments",
     pay_subtitle: "See customer debts and record payments.",
@@ -142,7 +142,7 @@ export const dictionaries = {
     pay_select_customer: "Select customer",
     pay_oldest_first: "Oldest debt first",
     pay_note_placeholder: "Optional note",
-    
+
     // Auth / Forms
     auth_login: "Login",
     auth_signup: "Sign Up",
@@ -155,11 +155,11 @@ export const dictionaries = {
     auth_no_account: "Don't have an account?",
     auth_have_account: "Already have an account?",
     auth_subtitle: "Manage sales, stock, customers, and payments.",
-    
+
     // Dev Tools
     dev_seed: "Seed Demo Dataset",
     dev_clear: "Clear My Data",
-    dev_tools: "Dev Tools"
+    dev_tools: "Dev Tools",
   },
   am: {
     // Navigation
@@ -169,14 +169,14 @@ export const dictionaries = {
     nav_sales: "ሽያጭ",
     nav_payments: "ክፍያዎች",
     nav_logout: "ውጣ",
-    
+
     // Common Actions
     action_save: "አስቀምጥ",
     action_cancel: "ሰርዝ",
     action_edit: "አስተካክል",
     action_delete: "አጥፋ",
     action_view_all: "ሁሉንም እይ",
-    
+
     // Dashboard
     dash_title: "ዳሽቦርድ",
     dash_subtitle: "የዛሬው የስራ ማጠቃለያ",
@@ -193,7 +193,7 @@ export const dictionaries = {
     dash_all_stock_good: "ሁሉም ምርቶች በቂ ክምችት አላቸው።",
     dash_remaining: "ቀሪ",
     dash_walk_in: "የዕለት ደንበኛ",
-    
+
     // Products
     prod_title: "ምርቶች",
     prod_subtitle: "የምርት ክምችትዎን ያስተዳድሩ",
@@ -230,7 +230,7 @@ export const dictionaries = {
     stock_decrease: "ቀንስ",
     stock_reason_placeholder: "አማራጭ ምክንያት",
     stock_adjust_btn: "አስተካክል",
-    
+
     // Customers
     cust_title: "ደንበኞች",
     cust_subtitle: "ደንበኞችዎን ያስተዳድሩ",
@@ -248,7 +248,7 @@ export const dictionaries = {
     cust_add_first: "ምንም ደንበኛ አልተገኘም። የመጀመሪያ ደንበኛዎን ያክሉ።",
     cust_outstanding: "ያልተከፈለ ዕዳ",
     cust_save: "ደንበኛውን አስቀምጥ",
-    
+
     // Sales
     sale_title: "ሽያጭ",
     sale_subtitle: "ሽያጭዎን ያስተዳድሩ",
@@ -276,7 +276,16 @@ export const dictionaries = {
     sale_credit: "በዱቤ",
     sale_id: "የሽያጭ መለያ",
     sale_remaining: "ቀሪ ዕዳ",
-    
+    sale_subtitle_new: "ምርቶችን ያክሉ፣ ክፍያ ያረጋግጡ እና ሽያጭ ያጠናቅቁ።",
+    sale_search_product: "ምርት ፈልግ",
+    sale_search_placeholder: "የምርት ስም ወይም SKU",
+    sale_select_product: "ምርት ምረጥ",
+    sale_add_btn: "አክል",
+    sale_no_products_added: "እስካሁን ምንም ምርት አልተጨመረም።",
+    sale_unit_price: "የአንዱ ዋጋ",
+    sale_credit_warning: "ለከፊል ወይም በዱቤ ሽያጭ ደንበኛ ይምረጡ።",
+    sale_only_avail: "የሚገኝ",
+
     // Payments
     pay_title: "ክፍያዎች",
     pay_subtitle: "የደንበኛ ዕዳ ይመልከቱ እና ክፍያ ይመዝግቡ።",
@@ -293,7 +302,7 @@ export const dictionaries = {
     pay_select_customer: "ደንበኛ ይምረጡ",
     pay_oldest_first: "የቀደመ ዕዳ አስቀድሞ",
     pay_note_placeholder: "አማራጭ ማስታወሻ",
-    
+
     // Auth / Forms
     auth_login: "ግባ",
     auth_signup: "ተመዝገብ",
@@ -306,11 +315,11 @@ export const dictionaries = {
     auth_no_account: "አካውንት የለዎትም?",
     auth_have_account: "አካውንት አለዎት?",
     auth_subtitle: "ሽያጭን፣ ክምችትን፣ ደንበኞችን እና ክፍያዎችን ያስተዳድሩ።",
-    
+
     // Dev Tools
     dev_seed: "የሙከራ ዳታ አስገባ",
     dev_clear: "የእኔን ዳታ አጥፋ",
-    dev_tools: "የገንቢ መሳሪያዎች"
+    dev_tools: "የገንቢ መሳሪያዎች",
   },
 };
 
