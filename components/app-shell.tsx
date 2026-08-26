@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Plus, LogOut } from "lucide-react";
@@ -17,11 +18,36 @@ const navItems: {
   mobileLabel: string;
   icon: "dashboard" | "products" | "customers" | "sales" | "payments";
 }[] = [
-  { href: "/dashboard", labelKey: "nav_dashboard", mobileLabel: "Home", icon: "dashboard" },
-  { href: "/products", labelKey: "nav_products", mobileLabel: "Stock", icon: "products" },
-  { href: "/customers", labelKey: "nav_customers", mobileLabel: "Clients", icon: "customers" },
-  { href: "/sales", labelKey: "nav_sales", mobileLabel: "Sales", icon: "sales" },
-  { href: "/payments", labelKey: "nav_payments", mobileLabel: "Pay", icon: "payments" },
+  {
+    href: "/dashboard",
+    labelKey: "nav_dashboard",
+    mobileLabel: "Home",
+    icon: "dashboard",
+  },
+  {
+    href: "/products",
+    labelKey: "nav_products",
+    mobileLabel: "Stock",
+    icon: "products",
+  },
+  {
+    href: "/customers",
+    labelKey: "nav_customers",
+    mobileLabel: "Clients",
+    icon: "customers",
+  },
+  {
+    href: "/sales",
+    labelKey: "nav_sales",
+    mobileLabel: "Sales",
+    icon: "sales",
+  },
+  {
+    href: "/payments",
+    labelKey: "nav_payments",
+    mobileLabel: "Pay",
+    icon: "payments",
+  },
 ];
 
 const quickActions: { href: string; labelKey: DictionaryKey }[] = [
@@ -50,8 +76,20 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-paper">
       <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-line bg-white px-4 py-5 lg:flex">
-        <Link className="block text-lg font-bold text-ink" href="/dashboard">
-          Wholesale MVP
+        <Link
+          className="flex items-center gap-3 text-lg font-bold text-ink"
+          href="/dashboard"
+        >
+          <div className="h-10 w-10 overflow-hidden rounded-lg border border-line bg-white shadow-sm">
+            <Image
+              alt="Wholesale MVP logo"
+              className="h-full w-full object-cover"
+              height={40}
+              src="/logo.svg"
+              width={40}
+            />
+          </div>
+          <span>ነጋዴ ERP</span>
         </Link>
         <p className="mt-1 text-xs text-muted">
           Business tools for daily sales
@@ -89,8 +127,20 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
 
       <header className="sticky top-0 z-20 flex flex-col gap-3 border-b border-line bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
         <div className="flex items-center justify-between gap-3">
-          <Link className="text-base font-bold" href="/dashboard">
-            Wholesale MVP
+          <Link
+            className="flex items-center gap-2 text-base font-bold"
+            href="/dashboard"
+          >
+            <div className="h-8 w-8 overflow-hidden rounded-md border border-line bg-white">
+              <Image
+                alt="Wholesale MVP logo"
+                className="h-full w-full object-cover"
+                height={32}
+                src="/logo.svg"
+                width={32}
+              />
+            </div>
+            <span></span>
           </Link>
           <div className="flex items-center gap-2">
             <div className="w-24">

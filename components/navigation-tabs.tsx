@@ -53,7 +53,9 @@ export function NavigationTabs({
               aria-label={item.label}
               className={clsx(
                 "flex h-14 flex-col items-center justify-center gap-1 rounded-md px-1 py-2 text-center transition-colors",
-                active ? "bg-brand-50 text-brand-700" : "text-slate-500 hover:bg-paper"
+                active
+                  ? "bg-brand-50 text-brand-700"
+                  : "text-slate-500 hover:bg-paper",
               )}
               href={item.href}
               key={item.href}
@@ -61,13 +63,13 @@ export function NavigationTabs({
               <Icon
                 className={clsx(
                   "h-5 w-5 transition-colors",
-                  active ? "text-brand-700" : "text-slate-500"
+                  active ? "text-brand-700" : "text-slate-500",
                 )}
               />
               <span
                 className={clsx(
                   "text-[10px] font-semibold leading-none transition-colors",
-                  active ? "text-brand-700" : "text-slate-500"
+                  active ? "text-brand-700" : "text-slate-500",
                 )}
               >
                 {item.mobileLabel}
@@ -89,12 +91,19 @@ export function NavigationTabs({
           <Link
             className={clsx(
               "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold transition-colors",
-              active ? "bg-brand-50 text-brand-700" : "text-slate-700 hover:bg-paper"
+              active
+                ? "bg-brand-50 text-brand-700"
+                : "text-slate-700 hover:bg-paper",
             )}
             href={item.href}
             key={item.href}
           >
-            <Icon className={clsx("h-4 w-4", active ? "text-brand-700" : "text-slate-700")} />
+            <Icon
+              className={clsx(
+                "h-4 w-4",
+                active ? "text-brand-700" : "text-slate-700",
+              )}
+            />
             {item.label}
           </Link>
         );
