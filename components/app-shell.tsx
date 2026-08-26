@@ -1,32 +1,28 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import {
-  LayoutDashboard,
-  Package,
-  Users,
-  ReceiptText,
-  WalletCards,
-  Plus,
-  LogOut,
-  type LucideIcon,
-} from "lucide-react";
+import { Plus, LogOut } from "lucide-react";
 import { createServerSupabaseClient } from "@/lib/supabase";
 import { signOut } from "@/lib/actions";
 import { hasSupabaseEnv } from "@/lib/env";
 import { SetupRequired } from "@/components/setup-required";
 import { DevTools } from "@/components/dev-tools";
+import { NavigationTabs } from "@/components/navigation-tabs";
 import { getDictionary } from "@/lib/i18n/server";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { DictionaryKey } from "@/lib/i18n/dictionaries";
 
-const navItems: { href: string; labelKey: DictionaryKey; icon: LucideIcon }[] =
-  [
-    { href: "/dashboard", labelKey: "nav_dashboard", icon: LayoutDashboard },
-    { href: "/products", labelKey: "nav_products", icon: Package },
-    { href: "/customers", labelKey: "nav_customers", icon: Users },
-    { href: "/sales", labelKey: "nav_sales", icon: ReceiptText },
-    { href: "/payments", labelKey: "nav_payments", icon: WalletCards },
-  ];
+const navItems: {
+  href: string;
+  labelKey: DictionaryKey;
+  mobileLabel: string;
+  icon: "dashboard" | "products" | "customers" | "sales" | "payments";
+}[] = [
+  { href: "/dashboard", labelKey: "nav_dashboard", mobileLabel: "Home", icon: "dashboard" },
+  { href: "/products", labelKey: "nav_products", mobileLabel: "Stock", icon: "products" },
+  { href: "/customers", labelKey: "nav_customers", mobileLabel: "Clients", icon: "customers" },
+  { href: "/sales", labelKey: "nav_sales", mobileLabel: "Sales", icon: "sales" },
+  { href: "/payments", labelKey: "nav_payments", mobileLabel: "Pay", icon: "payments" },
+];
 
 const quickActions: { href: string; labelKey: DictionaryKey }[] = [
   { href: "/products#add-product", labelKey: "prod_add" },
@@ -46,6 +42,10 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   if (!user) redirect("/login");
 
   const { t } = await getDictionary();
+  const desktopNavItems = navItems.map((item) => ({
+    ...item,
+    label: t(item.labelKey),
+  }));
 
   return (
     <div className="min-h-screen bg-paper">
@@ -57,21 +57,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
           Business tools for daily sales
         </p>
 
-        <nav className="mt-8 flex flex-col gap-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-paper"
-                href={item.href}
-                key={item.href}
-              >
-                <Icon className="h-4 w-4" />
-                {t(item.labelKey)}
-              </Link>
-            );
-          })}
-        </nav>
+        <NavigationTabs items={desktopNavItems} variant="desktop" />
 
         <div className="mt-8 flex-1 space-y-2">
           <p className="px-3 text-xs font-semibold uppercase tracking-normal text-muted">
@@ -116,21 +102,13 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
             </Link>
           </div>
         </div>
-        <nav className="grid grid-cols-5 gap-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                aria-label={t(item.labelKey)}
-                className="flex h-10 items-center justify-center rounded-md text-slate-700 hover:bg-paper"
-                href={item.href}
-                key={item.href}
-              >
-                <Icon className="h-5 w-5" />
-              </Link>
-            );
-          })}
-        </nav>
+        <NavigationTabs
+          items={navItems.map((item) => ({
+            ...item,
+            label: t(item.labelKey),
+          }))}
+          variant="mobile"
+        />
       </header>
 
       <main className="lg:pl-64">
