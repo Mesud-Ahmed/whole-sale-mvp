@@ -14,11 +14,7 @@ type Product = {
   name: string;
   sku: string | null;
   unit: string;
-  base_unit?: string | null;
   selling_price: number | string;
-  selling_unit_name?: string | null;
-  selling_unit_conversion?: number | string | null;
-  selling_unit_price?: number | string | null;
   current_quantity: number | string;
 };
 
@@ -31,7 +27,7 @@ type Customer = {
 type SaleItem = {
   product_id: string;
   name: string;
-  unit_name: string;
+  unit: string;
   available: number;
   quantity: number;
   unit_price: number;
@@ -74,39 +70,6 @@ export function SaleBuilder({
       .slice(0, 25);
   }, [products, query]);
 
-  const getUnitPrice = (product: Product, unitName: string) => {
-    const selectedUnitName =
-      unitName || product.base_unit || product.unit || "piece";
-    if (
-      product.selling_unit_name &&
-      selectedUnitName === product.selling_unit_name.trim()
-    ) {
-      return Number(product.selling_unit_price ?? product.selling_price ?? 0);
-    }
-    return Number(product.selling_price ?? 0);
-  };
-
-  const getUnitOptions = (product: Product) => {
-    const baseUnitName = product.base_unit || product.unit || "piece";
-    const options = [
-      {
-        value: baseUnitName,
-        label: baseUnitName,
-        price: Number(product.selling_price ?? 0),
-      },
-    ];
-
-    if (product.selling_unit_name && product.selling_unit_name.trim()) {
-      options.push({
-        value: product.selling_unit_name,
-        label: product.selling_unit_name,
-        price: Number(product.selling_unit_price ?? product.selling_price ?? 0),
-      });
-    }
-
-    return options;
-  };
-
   const discountNum = Number(discount || 0);
   const amountPaidNum = Number(amountPaid || 0);
 
@@ -121,14 +84,12 @@ export function SaleBuilder({
     product_id: item.product_id,
     quantity: item.quantity,
     unit_price: item.unit_price,
-    unit_name: item.unit_name,
   }));
 
   function addProduct() {
     const product = products.find((candidate) => candidate.id === productId);
     if (!product) return;
 
-    const baseUnit = product.base_unit || product.unit || "piece";
     const existing = items.find((item) => item.product_id === product.id);
     const available = Number(product.current_quantity);
 
@@ -146,7 +107,7 @@ export function SaleBuilder({
         {
           product_id: product.id,
           name: product.name,
-          unit_name: baseUnit,
+          unit: product.unit,
           available,
           quantity: available > 0 ? 1 : 0,
           unit_price: Number(product.selling_price),
@@ -159,33 +120,19 @@ export function SaleBuilder({
   }
 
   function updateItem(productIdToUpdate: string, changes: Partial<SaleItem>) {
-    const product = products.find(
-      (candidate) => candidate.id === productIdToUpdate,
-    );
     setItems((current) =>
-      current.map((item) => {
-        if (item.product_id !== productIdToUpdate) return item;
-
-        const nextUnitName = changes.unit_name ?? item.unit_name;
-        const nextProduct =
-          product ??
-          products.find((candidate) => candidate.id === productIdToUpdate);
-        const nextUnitPrice =
-          nextProduct && changes.unit_name
-            ? getUnitPrice(nextProduct, nextUnitName)
-            : item.unit_price;
-
-        return {
-          ...item,
-          ...changes,
-          unit_name: nextUnitName,
-          unit_price: nextUnitPrice,
-          quantity: Math.max(
-            0,
-            Math.min(changes.quantity ?? item.quantity, item.available),
-          ),
-        };
-      }),
+      current.map((item) =>
+        item.product_id === productIdToUpdate
+          ? {
+              ...item,
+              ...changes,
+              quantity: Math.max(
+                0,
+                Math.min(changes.quantity ?? item.quantity, item.available),
+              ),
+            }
+          : item,
+      ),
     );
   }
 
@@ -245,97 +192,72 @@ export function SaleBuilder({
           </div>
         ) : (
           <div className="overflow-hidden rounded-lg border border-line">
-            <div className="hidden grid-cols-[1.5fr_120px_120px_120px_120px_44px] gap-0 table-head px-4 py-3 md:grid">
+            <div className="hidden grid-cols-[1.5fr_120px_120px_120px_44px] gap-0 table-head px-4 py-3 md:grid">
               <span>{t("prod_name")}</span>
               <span>{t("sale_quantity")}</span>
-              <span>{t("sale_unit")}</span>
               <span>{t("sale_unit_price")}</span>
               <span>{t("sale_total")}</span>
               <span />
             </div>
             <div className="divide-y divide-line">
-              {items.map((item) => {
-                const product = products.find(
-                  (candidate) => candidate.id === item.product_id,
-                );
-                const unitOptions = product ? getUnitOptions(product) : [];
-
-                return (
-                  <div
-                    className="grid gap-3 p-4 md:grid-cols-[1.5fr_120px_120px_120px_120px_44px] md:items-center"
-                    key={item.product_id}
-                  >
-                    <div>
-                      <p className="font-semibold text-ink">{item.name}</p>
-                      <p className="text-xs text-muted">
-                        {t("sale_only_avail")} {item.available} {item.unit_name}
-                      </p>
-                    </div>
-                    <input
-                      aria-label={`${t("sale_quantity")} for ${item.name}`}
-                      className="input"
-                      max={item.available}
-                      min="0.01"
-                      onChange={(event) =>
-                        updateItem(item.product_id, {
-                          quantity: Number(event.target.value),
-                        })
-                      }
-                      step="0.01"
-                      type="number"
-                      value={item.quantity}
-                    />
-                    <div>
-                      <select
-                        className="input"
-                        onChange={(event) =>
-                          updateItem(item.product_id, {
-                            unit_name: event.target.value,
-                          })
-                        }
-                        value={item.unit_name}
-                      >
-                        {unitOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <input
-                      aria-label={`${t("sale_unit_price")} for ${item.name}`}
-                      className="input"
-                      min="0"
-                      onChange={(event) =>
-                        updateItem(item.product_id, {
-                          unit_price: Number(event.target.value),
-                        })
-                      }
-                      step="0.01"
-                      type="number"
-                      value={item.unit_price}
-                    />
-                    <p className="font-semibold">
-                      {formatEtb(item.quantity * item.unit_price)}
+              {items.map((item) => (
+                <div
+                  className="grid gap-3 p-4 md:grid-cols-[1.5fr_120px_120px_120px_44px] md:items-center"
+                  key={item.product_id}
+                >
+                  <div>
+                    <p className="font-semibold text-ink">{item.name}</p>
+                    <p className="text-xs text-muted">
+                      {t("sale_only_avail")} {item.available} {item.unit}
                     </p>
-                    <button
-                      aria-label={`${t("action_delete")} ${item.name}`}
-                      className="flex h-10 w-10 items-center justify-center rounded-md text-danger hover:bg-red-50"
-                      onClick={() =>
-                        setItems((current) =>
-                          current.filter(
-                            (candidate) =>
-                              candidate.product_id !== item.product_id,
-                          ),
-                        )
-                      }
-                      type="button"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
                   </div>
-                );
-              })}
+                  <input
+                    aria-label={`${t("sale_quantity")} for ${item.name}`}
+                    className="input"
+                    max={item.available}
+                    min="0.01"
+                    onChange={(event) =>
+                      updateItem(item.product_id, {
+                        quantity: Number(event.target.value),
+                      })
+                    }
+                    step="0.01"
+                    type="number"
+                    value={item.quantity}
+                  />
+                  <input
+                    aria-label={`${t("sale_unit_price")} for ${item.name}`}
+                    className="input"
+                    min="0"
+                    onChange={(event) =>
+                      updateItem(item.product_id, {
+                        unit_price: Number(event.target.value),
+                      })
+                    }
+                    step="0.01"
+                    type="number"
+                    value={item.unit_price}
+                  />
+                  <p className="font-semibold">
+                    {formatEtb(item.quantity * item.unit_price)}
+                  </p>
+                  <button
+                    aria-label={`${t("action_delete")} ${item.name}`}
+                    className="flex h-10 w-10 items-center justify-center rounded-md text-danger hover:bg-red-50"
+                    onClick={() =>
+                      setItems((current) =>
+                        current.filter(
+                          (candidate) =>
+                            candidate.product_id !== item.product_id,
+                        ),
+                      )
+                    }
+                    type="button"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         )}

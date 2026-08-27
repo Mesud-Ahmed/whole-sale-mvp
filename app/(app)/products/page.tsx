@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LiveSearch } from "@/components/ui/live-search";
 import { ProductDrawer } from "@/components/forms/product-drawer";
+import { DeleteProductButton } from "@/components/forms/delete-product-button";
 import { createServerSupabaseClient } from "@/lib/supabase";
 import { deactivateProduct } from "@/lib/actions";
 import { formatEtb, stockStatus } from "@/lib/utils";
@@ -123,16 +124,10 @@ export default async function ProductsPage({
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-2">
                             <ProductDrawer product={product} />
-                            <form action={deactivateProduct}>
-                              <input
-                                name="id"
-                                type="hidden"
-                                value={product.id}
-                              />
-                              <button className="btn-danger" type="submit">
-                                {t("action_delete")}
-                              </button>
-                            </form>
+                            <DeleteProductButton
+                              id={product.id}
+                              label={t("action_delete")}
+                            />
                           </div>
                         </td>
                       </tr>

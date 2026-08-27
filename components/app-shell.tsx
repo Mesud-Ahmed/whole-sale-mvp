@@ -144,13 +144,23 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
             <span>ነጋዴ ERP</span>
           </Link>
           <div className="flex items-center gap-2">
-            <div className="w-24">
+            <div className="w-20 sm:w-24">
               <LanguageSwitcher />
             </div>
-            <Link className="btn-primary h-9 px-3" href="/sales/new">
-              <Plus className="h-4 w-4" />
-              {t("sale_new")}
+            <Link className="btn-primary h-9 px-2.5 sm:px-3 text-xs sm:text-sm" href="/sales/new">
+              <Plus className="h-4 w-4 shrink-0" />
+              <span className="hidden xs:inline">{t("sale_new")}</span>
             </Link>
+            <form action={signOut}>
+              <button
+                className="btn-secondary h-9 px-2.5 text-xs flex items-center gap-1"
+                type="submit"
+                title={t("nav_logout")}
+              >
+                <LogOut className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline">{t("nav_logout")}</span>
+              </button>
+            </form>
           </div>
         </div>
         <NavigationTabs

@@ -11,25 +11,18 @@ export default async function DashboardPage() {
   const today = new Date().toISOString().slice(0, 10);
   const { t } = await getDictionary();
 
-  const { data: todaySales } = await supabase
-    .from("sales")
-    .select("id,total_amount")
-    .eq("sale_date", today);
-
-  const todaySaleIds = (todaySales ?? []).map((sale) => sale.id);
-
   const [
+    { data: sales },
     { data: debts },
     { data: products },
     { data: recentSales },
-    { data: todaySaleItems },
+    { data: saleItems },
   ] = await Promise.all([
+    supabase.from("sales").select("id,total_amount,discount,sale_date"),
     supabase.from("customer_balances").select("outstanding_balance"),
     supabase
       .from("products")
-      .select(
-        "id,name,unit,base_unit,current_quantity,minimum_stock,purchase_price,selling_unit_name,selling_unit_conversion,selling_unit_price",
-      )
+      .select("id,name,unit,current_quantity,minimum_stock")
       .eq("active", true),
     supabase
       .from("sales")
@@ -40,33 +33,14 @@ export default async function DashboardPage() {
       .limit(8),
     supabase
       .from("sale_items")
-      .select("sale_id,product_id,quantity,unit_name,unit_price")
-      .in("sale_id", todaySaleIds),
+      .select("quantity,unit_price,products(purchase_price),sales(sale_date)"),
   ]);
 
-  const todayTotal = (todaySales ?? []).reduce(
+  const todaySales = (sales ?? []).filter((sale) => sale.sale_date === today);
+  const todayTotal = todaySales.reduce(
     (sum, sale) => sum + Number(sale.total_amount),
     0,
   );
-  const todayProductMap = new Map(
-    (products ?? []).map((product) => [product.id, product]),
-  );
-  const todayEstimatedProfit = (todaySaleItems ?? []).reduce((sum, item) => {
-    const product = todayProductMap.get(item.product_id);
-    if (!product) return sum;
-
-    const selectedUnitName =
-      item.unit_name || product.base_unit || product.unit;
-    const conversionFactor =
-      selectedUnitName === product.selling_unit_name &&
-      Number(product.selling_unit_conversion ?? 1) > 0
-        ? Number(product.selling_unit_conversion ?? 1)
-        : 1;
-    const baseQuantity = Number(item.quantity ?? 0) * conversionFactor;
-    const revenue = Number(item.unit_price ?? 0) * Number(item.quantity ?? 0);
-    const cost = Number(product.purchase_price ?? 0) * baseQuantity;
-    return sum + (revenue - cost);
-  }, 0);
   const totalDebt = (debts ?? []).reduce(
     (sum, row) => sum + Number(row.outstanding_balance),
     0,
@@ -75,6 +49,38 @@ export default async function DashboardPage() {
     (product) =>
       Number(product.current_quantity) <= Number(product.minimum_stock),
   );
+
+  let todayProfit = 0;
+  let totalProfit = 0;
+
+  const todayDiscounts = todaySales.reduce(
+    (sum, sale) => sum + Number(sale.discount ?? 0),
+    0,
+  );
+  const totalDiscounts = (sales ?? []).reduce(
+    (sum, sale) => sum + Number(sale.discount ?? 0),
+    0,
+  );
+
+  for (const item of saleItems ?? []) {
+    const prod = Array.isArray(item.products)
+      ? item.products[0]
+      : item.products;
+    const sale = Array.isArray(item.sales) ? item.sales[0] : item.sales;
+
+    const purchasePrice = Number(prod?.purchase_price ?? 0);
+    const qty = Number(item.quantity ?? 0);
+    const unitPrice = Number(item.unit_price ?? 0);
+    const itemMargin = qty * (unitPrice - purchasePrice);
+
+    totalProfit += itemMargin;
+    if (sale?.sale_date === today) {
+      todayProfit += itemMargin;
+    }
+  }
+
+  todayProfit -= todayDiscounts;
+  totalProfit -= totalDiscounts;
 
   return (
     <div className="space-y-5">
@@ -85,20 +91,25 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <section className="grid gap-4 sm:grid-cols-2">
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
           label={t("dash_today_sales_etb")}
           value={formatEtb(todayTotal)}
           detail={t("dash_today_sales_detail")}
         />
         <StatCard
-          label={t("dash_today_estimated_profit")}
-          value={formatEtb(todayEstimatedProfit)}
-          detail={t("dash_profit_detail")}
+          label={t("dash_today_profit")}
+          value={formatEtb(todayProfit)}
+          detail={t("dash_today_profit_detail")}
+        />
+        <StatCard
+          label={t("dash_total_profit")}
+          value={formatEtb(totalProfit)}
+          detail={t("dash_total_profit_detail")}
         />
         <StatCard
           label={t("dash_today_sales_count")}
-          value={String(todaySales?.length ?? 0)}
+          value={String(todaySales.length)}
           detail={t("dash_sales_count_detail")}
         />
         <StatCard

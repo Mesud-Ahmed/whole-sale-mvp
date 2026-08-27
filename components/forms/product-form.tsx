@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import { HelpCircle } from "lucide-react";
 import { FormMessage } from "@/components/ui/form-message";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { saveProduct } from "@/lib/actions";
@@ -10,15 +11,37 @@ type Product = {
   id?: string;
   name?: string | null;
   unit?: string | null;
-  base_unit?: string | null;
   purchase_price?: number | string | null;
   selling_price?: number | string | null;
   current_quantity?: number | string | null;
   minimum_stock?: number | string | null;
-  selling_unit_name?: string | null;
-  selling_unit_conversion?: number | string | null;
-  selling_unit_price?: number | string | null;
 };
+
+function HelpTooltip({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <span className="relative inline-flex items-center ml-1">
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen((prev) => !prev);
+        }}
+        className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold text-slate-700 hover:bg-brand-600 hover:text-white focus:outline-none transition-colors"
+        title="Click for help"
+      >
+        <HelpCircle className="h-3.5 w-3.5" />
+      </button>
+      {open && (
+        <span className="absolute bottom-full left-0 mb-2 z-50 w-60 rounded-lg border border-slate-700 bg-slate-900 p-2.5 text-xs text-slate-100 shadow-xl leading-relaxed">
+          {text}
+        </span>
+      )}
+    </span>
+  );
+}
 
 export function ProductForm({ product }: { product?: Product }) {
   const [state, formAction] = useActionState(saveProduct, null);
@@ -42,10 +65,10 @@ export function ProductForm({ product }: { product?: Product }) {
       </label>
 
       <label className="field">
-        {t("prod_base_unit")}
+        {t("prod_unit")}
         <input
           className="input"
-          defaultValue={product?.base_unit ?? product?.unit ?? "piece"}
+          defaultValue={product?.unit ?? "piece"}
           name="unit"
           required
         />
@@ -70,7 +93,10 @@ export function ProductForm({ product }: { product?: Product }) {
       </label>
 
       <label className="field">
-        {t("prod_purchase_price")}
+        <span className="flex items-center">
+          {t("prod_purchase_price")}
+          <HelpTooltip text="This is the cost paid to buy the item before it is sold to a customer." />
+        </span>
         <input
           className="input"
           defaultValue={
@@ -107,7 +133,10 @@ export function ProductForm({ product }: { product?: Product }) {
       </label>
 
       <label className="field">
-        {t("prod_min_stock")}
+        <span className="flex items-center">
+          {t("prod_min_stock")}
+          <HelpTooltip text="Keep this low enough to warn you before stock runs out, without over-ordering." />
+        </span>
         <input
           className="input"
           defaultValue={
@@ -123,55 +152,6 @@ export function ProductForm({ product }: { product?: Product }) {
           type="number"
         />
       </label>
-
-      <label className="field">
-        {t("prod_alt_unit_name")}
-        <input
-          className="input"
-          defaultValue={product?.selling_unit_name ?? ""}
-          name="selling_unit_name"
-          placeholder={t("prod_alt_unit_name_placeholder")}
-        />
-      </label>
-
-      <label className="field">
-        {t("prod_alt_unit_conversion")}
-        <input
-          className="input"
-          defaultValue={
-            product?.selling_unit_conversion !== undefined &&
-            product?.selling_unit_conversion !== null
-              ? String(product.selling_unit_conversion)
-              : ""
-          }
-          min="0.0001"
-          name="selling_unit_conversion"
-          step="0.01"
-          type="number"
-        />
-      </label>
-
-      <label className="field sm:col-span-2">
-        {t("prod_alt_unit_price")}
-        <input
-          className="input"
-          defaultValue={
-            product?.selling_unit_price !== undefined &&
-            product?.selling_unit_price !== null
-              ? String(product.selling_unit_price)
-              : ""
-          }
-          min="0"
-          name="selling_unit_price"
-          step="0.01"
-          type="number"
-        />
-      </label>
-
-      <div className="sm:col-span-2 space-y-2">
-        <p className="text-xs text-muted">{t("prod_purchase_price_help")}</p>
-        <p className="text-xs text-muted">{t("prod_min_stock_help")}</p>
-      </div>
 
       <div className="flex items-center gap-3 sm:col-span-2">
         <SubmitButton>{editing ? t("prod_save") : t("prod_add")}</SubmitButton>

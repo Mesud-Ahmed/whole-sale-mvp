@@ -10,10 +10,6 @@ create table products (
   sku text,
   category text,
   unit text not null default 'piece',
-  base_unit text not null default 'piece',
-  selling_unit_name text,
-  selling_unit_conversion numeric(14,2) default 1 check (selling_unit_conversion > 0),
-  selling_unit_price numeric(14,2) check (selling_unit_price >= 0),
   purchase_price numeric(14,2) not null check (purchase_price >= 0),
   selling_price numeric(14,2) not null check (selling_price >= 0),
   current_quantity numeric(14,2) not null default 0 check (current_quantity >= 0),
@@ -54,7 +50,6 @@ create table sale_items (
   owner_id uuid not null references auth.users(id) on delete cascade,
   sale_id uuid not null references sales(id) on delete cascade,
   product_id uuid not null references products(id) on delete restrict,
-  unit_name text not null default 'piece',
   quantity numeric(14,2) not null check (quantity > 0),
   unit_price numeric(14,2) not null check (unit_price >= 0),
   total numeric(14,2) not null check (total >= 0)
@@ -185,10 +180,6 @@ create or replace function create_product_with_stock(
   p_sku text,
   p_category text,
   p_unit text,
-  p_base_unit text,
-  p_selling_unit_name text,
-  p_selling_unit_conversion numeric,
-  p_selling_unit_price numeric,
   p_purchase_price numeric,
   p_selling_price numeric,
   p_initial_quantity numeric,
@@ -201,7 +192,6 @@ set search_path = public
 as $$
 declare
   v_owner uuid := auth.uid();
-  v_base_unit text := coalesce(nullif(p_base_unit, ''), coalesce(nullif(p_unit, ''), 'piece'));
   v_product_id uuid;
 begin
   if v_owner is null or p_created_by <> v_owner then
@@ -212,27 +202,11 @@ begin
     raise exception 'Invalid numeric value';
   end if;
 
-  if p_selling_unit_name is not null and (p_selling_unit_name = '' or p_selling_unit_conversion is null or p_selling_unit_conversion <= 0 or p_selling_unit_price is null or p_selling_unit_price < 0) then
-    raise exception 'Invalid selling unit configuration';
-  end if;
-
   insert into products (
-    owner_id, name, sku, category, unit, base_unit, selling_unit_name, selling_unit_conversion, selling_unit_price,
-    purchase_price, selling_price, current_quantity, minimum_stock
+    owner_id, name, sku, category, unit, purchase_price, selling_price, current_quantity, minimum_stock
   ) values (
-    v_owner,
-    p_name,
-    nullif(p_sku, ''),
-    nullif(p_category, ''),
-    v_base_unit,
-    v_base_unit,
-    nullif(p_selling_unit_name, ''),
-    p_selling_unit_conversion,
-    p_selling_unit_price,
-    p_purchase_price,
-    p_selling_price,
-    p_initial_quantity,
-    p_minimum_stock
+    v_owner, p_name, nullif(p_sku, ''), nullif(p_category, ''), coalesce(nullif(p_unit, ''), 'piece'),
+    p_purchase_price, p_selling_price, p_initial_quantity, p_minimum_stock
   )
   returning id into v_product_id;
 
@@ -321,37 +295,24 @@ begin
 
   for v_item in select * from jsonb_array_elements(p_items)
   loop
-    declare
-      v_unit_name text := coalesce(nullif(v_item->>'unit_name', ''), v_product.unit);
-      v_base_quantity numeric;
-    begin
-      if (v_item->>'quantity')::numeric <= 0 or (v_item->>'unit_price')::numeric < 0 then
-        raise exception 'Invalid quantity';
-      end if;
+    if (v_item->>'quantity')::numeric <= 0 or (v_item->>'unit_price')::numeric < 0 then
+      raise exception 'Invalid quantity';
+    end if;
 
-      select * into v_product
-      from products
-      where id = (v_item->>'product_id')::uuid and owner_id = v_owner and active = true
-      for update;
+    select * into v_product
+    from products
+    where id = (v_item->>'product_id')::uuid and owner_id = v_owner and active = true
+    for update;
 
-      if not found then
-        raise exception 'Product not found';
-      end if;
+    if not found then
+      raise exception 'Product not found';
+    end if;
 
-      v_unit_name := coalesce(nullif(v_item->>'unit_name', ''), v_product.unit);
+    if v_product.current_quantity < (v_item->>'quantity')::numeric then
+      raise exception 'Only % % available.', v_product.current_quantity, v_product.unit;
+    end if;
 
-      if v_unit_name = v_product.selling_unit_name and v_product.selling_unit_conversion is not null then
-        v_base_quantity := (v_item->>'quantity')::numeric * v_product.selling_unit_conversion;
-      else
-        v_base_quantity := (v_item->>'quantity')::numeric;
-      end if;
-
-      if v_product.current_quantity < v_base_quantity then
-        raise exception 'Only % % available.', v_product.current_quantity, v_product.unit;
-      end if;
-
-      v_subtotal := v_subtotal + ((v_item->>'quantity')::numeric * (v_item->>'unit_price')::numeric);
-    end;
+    v_subtotal := v_subtotal + ((v_item->>'quantity')::numeric * (v_item->>'unit_price')::numeric);
   end loop;
 
   if p_discount > v_subtotal then
@@ -388,48 +349,30 @@ begin
 
   for v_item in select * from jsonb_array_elements(p_items)
   loop
-    declare
-      v_unit_name text := coalesce(nullif(v_item->>'unit_name', ''), (select unit from products where id = (v_item->>'product_id')::uuid and owner_id = v_owner));
-      v_base_quantity numeric;
-    begin
-      select * into v_product
-      from products
-      where id = (v_item->>'product_id')::uuid and owner_id = v_owner and active = true;
+    insert into sale_items (owner_id, sale_id, product_id, quantity, unit_price, total)
+    values (
+      v_owner,
+      v_sale_id,
+      (v_item->>'product_id')::uuid,
+      (v_item->>'quantity')::numeric,
+      (v_item->>'unit_price')::numeric,
+      (v_item->>'quantity')::numeric * (v_item->>'unit_price')::numeric
+    );
 
-      v_unit_name := coalesce(nullif(v_item->>'unit_name', ''), v_product.unit);
+    update products
+    set current_quantity = current_quantity - (v_item->>'quantity')::numeric
+    where id = (v_item->>'product_id')::uuid and owner_id = v_owner;
 
-      if v_unit_name = v_product.selling_unit_name and v_product.selling_unit_conversion is not null then
-        v_base_quantity := (v_item->>'quantity')::numeric * v_product.selling_unit_conversion;
-      else
-        v_base_quantity := (v_item->>'quantity')::numeric;
-      end if;
-
-      insert into sale_items (owner_id, sale_id, product_id, unit_name, quantity, unit_price, total)
-      values (
-        v_owner,
-        v_sale_id,
-        (v_item->>'product_id')::uuid,
-        v_unit_name,
-        (v_item->>'quantity')::numeric,
-        (v_item->>'unit_price')::numeric,
-        (v_item->>'quantity')::numeric * (v_item->>'unit_price')::numeric
-      );
-
-      update products
-      set current_quantity = current_quantity - v_base_quantity
-      where id = (v_item->>'product_id')::uuid and owner_id = v_owner;
-
-      insert into inventory_movements (owner_id, product_id, type, quantity, reference_id, note, created_by)
-      values (
-        v_owner,
-        (v_item->>'product_id')::uuid,
-        'SALE',
-        -v_base_quantity,
-        v_sale_id,
-        'Sale completed',
-        v_owner
-      );
-    end;
+    insert into inventory_movements (owner_id, product_id, type, quantity, reference_id, note, created_by)
+    values (
+      v_owner,
+      (v_item->>'product_id')::uuid,
+      'SALE',
+      -((v_item->>'quantity')::numeric),
+      v_sale_id,
+      'Sale completed',
+      v_owner
+    );
   end loop;
 
   if p_amount_paid > 0 and p_customer_id is not null then
