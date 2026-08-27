@@ -6,14 +6,16 @@ export default async function NewSalePage() {
   const [{ data: products }, { data: customers }] = await Promise.all([
     supabase
       .from("products")
-      .select("id,name,sku,unit,selling_price,current_quantity")
+      .select(
+        "id,name,sku,unit,base_unit,selling_price,selling_unit_name,selling_unit_conversion,selling_unit_price,current_quantity",
+      )
       .eq("active", true)
       .order("name", { ascending: true }),
     supabase
       .from("customers")
       .select("id,name,business_name")
       .eq("active", true)
-      .order("name", { ascending: true })
+      .order("name", { ascending: true }),
   ]);
 
   return <SaleBuilder customers={customers ?? []} products={products ?? []} />;

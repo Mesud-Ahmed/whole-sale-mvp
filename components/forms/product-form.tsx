@@ -10,10 +10,14 @@ type Product = {
   id?: string;
   name?: string | null;
   unit?: string | null;
+  base_unit?: string | null;
   purchase_price?: number | string | null;
   selling_price?: number | string | null;
   current_quantity?: number | string | null;
   minimum_stock?: number | string | null;
+  selling_unit_name?: string | null;
+  selling_unit_conversion?: number | string | null;
+  selling_unit_price?: number | string | null;
 };
 
 export function ProductForm({ product }: { product?: Product }) {
@@ -38,10 +42,10 @@ export function ProductForm({ product }: { product?: Product }) {
       </label>
 
       <label className="field">
-        {t("prod_unit")}
+        {t("prod_base_unit")}
         <input
           className="input"
-          defaultValue={product?.unit ?? "piece"}
+          defaultValue={product?.base_unit ?? product?.unit ?? "piece"}
           name="unit"
           required
         />
@@ -115,6 +119,50 @@ export function ProductForm({ product }: { product?: Product }) {
           min="0"
           name="minimum_stock"
           required
+          step="0.01"
+          type="number"
+        />
+      </label>
+
+      <label className="field">
+        {t("prod_alt_unit_name")}
+        <input
+          className="input"
+          defaultValue={product?.selling_unit_name ?? ""}
+          name="selling_unit_name"
+          placeholder={t("prod_alt_unit_name_placeholder")}
+        />
+      </label>
+
+      <label className="field">
+        {t("prod_alt_unit_conversion")}
+        <input
+          className="input"
+          defaultValue={
+            product?.selling_unit_conversion !== undefined &&
+            product?.selling_unit_conversion !== null
+              ? String(product.selling_unit_conversion)
+              : ""
+          }
+          min="0.0001"
+          name="selling_unit_conversion"
+          step="0.01"
+          type="number"
+        />
+      </label>
+
+      <label className="field sm:col-span-2">
+        {t("prod_alt_unit_price")}
+        <input
+          className="input"
+          defaultValue={
+            product?.selling_unit_price !== undefined &&
+            product?.selling_unit_price !== null
+              ? String(product.selling_unit_price)
+              : ""
+          }
+          min="0"
+          name="selling_unit_price"
           step="0.01"
           type="number"
         />

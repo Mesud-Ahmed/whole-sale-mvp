@@ -11,17 +11,25 @@ export default async function DashboardPage() {
   const today = new Date().toISOString().slice(0, 10);
   const { t } = await getDictionary();
 
+  const { data: todaySales } = await supabase
+    .from("sales")
+    .select("id,total_amount")
+    .eq("sale_date", today);
+
+  const todaySaleIds = (todaySales ?? []).map((sale) => sale.id);
+
   const [
-    { data: todaySales },
     { data: debts },
     { data: products },
     { data: recentSales },
+    { data: todaySaleItems },
   ] = await Promise.all([
-    supabase.from("sales").select("id,total_amount").eq("sale_date", today),
     supabase.from("customer_balances").select("outstanding_balance"),
     supabase
       .from("products")
-      .select("id,name,unit,current_quantity,minimum_stock")
+      .select(
+        "id,name,unit,base_unit,current_quantity,minimum_stock,purchase_price,selling_unit_name,selling_unit_conversion,selling_unit_price",
+      )
       .eq("active", true),
     supabase
       .from("sales")
@@ -30,12 +38,35 @@ export default async function DashboardPage() {
       )
       .order("created_at", { ascending: false })
       .limit(8),
+    supabase
+      .from("sale_items")
+      .select("sale_id,product_id,quantity,unit_name,unit_price")
+      .in("sale_id", todaySaleIds),
   ]);
 
   const todayTotal = (todaySales ?? []).reduce(
     (sum, sale) => sum + Number(sale.total_amount),
     0,
   );
+  const todayProductMap = new Map(
+    (products ?? []).map((product) => [product.id, product]),
+  );
+  const todayEstimatedProfit = (todaySaleItems ?? []).reduce((sum, item) => {
+    const product = todayProductMap.get(item.product_id);
+    if (!product) return sum;
+
+    const selectedUnitName =
+      item.unit_name || product.base_unit || product.unit;
+    const conversionFactor =
+      selectedUnitName === product.selling_unit_name &&
+      Number(product.selling_unit_conversion ?? 1) > 0
+        ? Number(product.selling_unit_conversion ?? 1)
+        : 1;
+    const baseQuantity = Number(item.quantity ?? 0) * conversionFactor;
+    const revenue = Number(item.unit_price ?? 0) * Number(item.quantity ?? 0);
+    const cost = Number(product.purchase_price ?? 0) * baseQuantity;
+    return sum + (revenue - cost);
+  }, 0);
   const totalDebt = (debts ?? []).reduce(
     (sum, row) => sum + Number(row.outstanding_balance),
     0,
@@ -59,6 +90,11 @@ export default async function DashboardPage() {
           label={t("dash_today_sales_etb")}
           value={formatEtb(todayTotal)}
           detail={t("dash_today_sales_detail")}
+        />
+        <StatCard
+          label={t("dash_today_estimated_profit")}
+          value={formatEtb(todayEstimatedProfit)}
+          detail={t("dash_profit_detail")}
         />
         <StatCard
           label={t("dash_today_sales_count")}

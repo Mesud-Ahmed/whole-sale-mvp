@@ -17,6 +17,9 @@ const productSchema = z.object({
   selling_price: z.number().min(0),
   current_quantity: z.number().min(0),
   minimum_stock: z.number().min(0),
+  selling_unit_name: z.string().optional().nullable(),
+  selling_unit_conversion: z.number().min(0.0001).optional().nullable(),
+  selling_unit_price: z.number().min(0).optional().nullable(),
 });
 
 const customerSchema = z.object({
@@ -97,14 +100,44 @@ export async function saveProduct(
   formData: FormData,
 ): Promise<FormState> {
   const { supabase, userId } = await getUserId();
+  const baseUnit = String(formData.get("unit") || "piece").trim() || "piece";
+  const sellingUnitName = String(
+    formData.get("selling_unit_name") ?? "",
+  ).trim();
+  const sellingUnitConversion = toNumber(
+    formData.get("selling_unit_conversion"),
+  );
+  const sellingUnitPrice = toNumber(formData.get("selling_unit_price"));
+  const hasAlternativeSellingUnit =
+    Boolean(sellingUnitName) ||
+    sellingUnitConversion > 0 ||
+    sellingUnitPrice > 0;
+
+  if (hasAlternativeSellingUnit) {
+    if (
+      !sellingUnitName ||
+      sellingUnitConversion <= 0 ||
+      sellingUnitPrice < 0
+    ) {
+      return formError(
+        "Complete the additional selling unit details to save the product.",
+      );
+    }
+  }
+
   const parsed = productSchema.safeParse({
     id: String(formData.get("id") || "") || undefined,
     name: String(formData.get("name") ?? "").trim(),
-    unit: String(formData.get("unit") || "piece").trim(),
+    unit: baseUnit,
     purchase_price: toNumber(formData.get("purchase_price")),
     selling_price: toNumber(formData.get("selling_price")),
     current_quantity: toNumber(formData.get("current_quantity")),
     minimum_stock: toNumber(formData.get("minimum_stock")),
+    selling_unit_name: hasAlternativeSellingUnit ? sellingUnitName : null,
+    selling_unit_conversion: hasAlternativeSellingUnit
+      ? sellingUnitConversion
+      : null,
+    selling_unit_price: hasAlternativeSellingUnit ? sellingUnitPrice : null,
   });
 
   if (!parsed.success)
@@ -116,6 +149,10 @@ export async function saveProduct(
       .update({
         name: parsed.data.name,
         unit: parsed.data.unit,
+        base_unit: parsed.data.unit,
+        selling_unit_name: parsed.data.selling_unit_name,
+        selling_unit_conversion: parsed.data.selling_unit_conversion,
+        selling_unit_price: parsed.data.selling_unit_price,
         purchase_price: parsed.data.purchase_price,
         selling_price: parsed.data.selling_price,
         minimum_stock: parsed.data.minimum_stock,
@@ -129,6 +166,10 @@ export async function saveProduct(
       p_sku: null,
       p_category: null,
       p_unit: parsed.data.unit,
+      p_base_unit: parsed.data.unit,
+      p_selling_unit_name: parsed.data.selling_unit_name,
+      p_selling_unit_conversion: parsed.data.selling_unit_conversion,
+      p_selling_unit_price: parsed.data.selling_unit_price,
       p_purchase_price: parsed.data.purchase_price,
       p_selling_price: parsed.data.selling_price,
       p_initial_quantity: parsed.data.current_quantity,
@@ -240,6 +281,7 @@ export async function completeSale(
     product_id: string;
     quantity: number;
     unit_price: number;
+    unit_name?: string;
   }>;
   const customerId = String(formData.get("customer_id") || "") || null;
   const discount = toNumber(formData.get("discount"));
@@ -255,7 +297,10 @@ export async function completeSale(
     p_sale_date: saleDate,
     p_discount: discount,
     p_amount_paid: amountPaid,
-    p_items: items,
+    p_items: items.map((item) => ({
+      ...item,
+      unit_name: item.unit_name || "",
+    })),
     p_created_by: userId,
   });
 
