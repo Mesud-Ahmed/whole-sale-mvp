@@ -54,22 +54,53 @@ export default async function PaymentsPage() {
         <div className="panel">
           <h2 className="mb-4 text-base font-bold">{t("pay_customers_owe")}</h2>
           {debts?.length ? (
-            <div className="space-y-3">
-              {debts.map((customer) => (
-                <Link
-                  className="grid gap-2 rounded-md border border-line p-4 text-sm hover:bg-paper sm:grid-cols-4"
-                  href={`/customers/${customer.customer_id}`}
-                  key={customer.customer_id}
-                >
-                  <span className="font-semibold">{customer.name}</span>
-                  <span>{customer.business_name || "-"}</span>
-                  <span>{formatEtb(customer.outstanding_balance)}</span>
-                  <span className="text-muted">
-                    {t("pay_last_paid")}{" "}
-                    {formatDate(customer.last_payment_date)}
-                  </span>
-                </Link>
-              ))}
+            <div className="overflow-hidden rounded-lg border border-line">
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-left text-sm">
+                  <thead className="bg-paper text-muted">
+                    <tr>
+                      <th className="px-4 py-3 font-semibold">
+                        {t("cust_name")}
+                      </th>
+                      <th className="px-4 py-3 font-semibold">
+                        {t("cust_business")}
+                      </th>
+                      <th className="px-4 py-3 font-semibold">
+                        {t("cust_debt")}
+                      </th>
+                      <th className="px-4 py-3 font-semibold">
+                        {t("pay_last_paid")}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {debts.map((customer) => (
+                      <tr
+                        className="border-t border-line"
+                        key={customer.customer_id}
+                      >
+                        <td className="px-4 py-3">
+                          <Link
+                            className="font-semibold text-brand-700"
+                            href={`/customers/${customer.customer_id}`}
+                          >
+                            {customer.name}
+                          </Link>
+                        </td>
+                        <td className="px-4 py-3">
+                          {customer.business_name || "-"}
+                        </td>
+                        <td className="px-4 py-3 font-semibold text-danger">
+                          {formatEtb(customer.outstanding_balance)}
+                        </td>
+                        <td className="px-4 py-3 text-muted">
+                          {formatDate(customer.last_payment_date)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           ) : (
             <EmptyState title={t("dash_no_debt")} />
@@ -104,25 +135,48 @@ export default async function PaymentsPage() {
           <h2 className="mb-4 text-base font-bold">{t("pay_recent")}</h2>
           {recentPayments?.length ? (
             <div className="overflow-hidden rounded-lg border border-line">
-              <div className="divide-y divide-line">
-                {recentPayments.map((payment) => {
-                  const customer = Array.isArray(payment.customers)
-                    ? payment.customers[0]
-                    : payment.customers;
-                  return (
-                    <div
-                      className="grid gap-2 p-4 text-sm sm:grid-cols-4"
-                      key={payment.id}
-                    >
-                      <span className="font-semibold">
-                        {customer?.name ?? t("sale_customer_filter")}
-                      </span>
-                      <span>{formatEtb(payment.amount)}</span>
-                      <span>{formatDate(payment.payment_date)}</span>
-                      <span className="text-muted">{payment.note || "-"}</span>
-                    </div>
-                  );
-                })}
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-left text-sm">
+                  <thead className="bg-paper text-muted">
+                    <tr>
+                      <th className="px-4 py-3 font-semibold">
+                        {t("cust_name")}
+                      </th>
+                      <th className="px-4 py-3 font-semibold">
+                        {t("pay_amount")}
+                      </th>
+                      <th className="px-4 py-3 font-semibold">
+                        {t("pay_date")}
+                      </th>
+                      <th className="px-4 py-3 font-semibold">
+                        {t("pay_notes")}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentPayments.map((payment) => {
+                      const customer = Array.isArray(payment.customers)
+                        ? payment.customers[0]
+                        : payment.customers;
+                      return (
+                        <tr className="border-t border-line" key={payment.id}>
+                          <td className="px-4 py-3 font-semibold">
+                            {customer?.name ?? t("sale_customer_filter")}
+                          </td>
+                          <td className="px-4 py-3">
+                            {formatEtb(payment.amount)}
+                          </td>
+                          <td className="px-4 py-3 text-muted">
+                            {formatDate(payment.payment_date)}
+                          </td>
+                          <td className="px-4 py-3 text-muted">
+                            {payment.note || "-"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
           ) : (
@@ -139,25 +193,46 @@ export default async function PaymentsPage() {
         </h2>
         {recentCredits?.length ? (
           <div className="overflow-hidden rounded-lg border border-line">
-            <div className="divide-y divide-line">
-              {recentCredits.map((credit) => {
-                const customer = Array.isArray(credit.customers)
-                  ? credit.customers[0]
-                  : credit.customers;
-                return (
-                  <div
-                    className="grid gap-2 p-4 text-sm sm:grid-cols-4"
-                    key={credit.id}
-                  >
-                    <span className="font-semibold">
-                      {customer?.name ?? t("sale_customer_filter")}
-                    </span>
-                    <span>{formatEtb(credit.amount)}</span>
-                    <span>{formatDate(credit.credit_date)}</span>
-                    <span className="text-muted">{credit.note || "-"}</span>
-                  </div>
-                );
-              })}
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left text-sm">
+                <thead className="bg-paper text-muted">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold">
+                      {t("cust_name")}
+                    </th>
+                    <th className="px-4 py-3 font-semibold">
+                      {t("pay_amount")}
+                    </th>
+                    <th className="px-4 py-3 font-semibold">{t("pay_date")}</th>
+                    <th className="px-4 py-3 font-semibold">
+                      {t("pay_notes")}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentCredits.map((credit) => {
+                    const customer = Array.isArray(credit.customers)
+                      ? credit.customers[0]
+                      : credit.customers;
+                    return (
+                      <tr className="border-t border-line" key={credit.id}>
+                        <td className="px-4 py-3 font-semibold">
+                          {customer?.name ?? t("sale_customer_filter")}
+                        </td>
+                        <td className="px-4 py-3">
+                          {formatEtb(credit.amount)}
+                        </td>
+                        <td className="px-4 py-3 text-muted">
+                          {formatDate(credit.credit_date)}
+                        </td>
+                        <td className="px-4 py-3 text-muted">
+                          {credit.note || "-"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
         ) : (

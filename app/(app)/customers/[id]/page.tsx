@@ -80,9 +80,6 @@ export default async function CustomerDetailPage({
           </p>
           <p className="mt-1 text-sm text-muted">{t("cust_detail_subtitle")}</p>
         </div>
-        <Link className="btn-primary" href="/sales/new">
-          {t("sale_new")}
-        </Link>
       </div>
 
       <section className="grid gap-4 sm:grid-cols-4">

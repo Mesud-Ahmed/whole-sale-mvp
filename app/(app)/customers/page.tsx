@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { ChevronRight, Search } from "lucide-react";
 import { CustomerDrawer } from "@/components/forms/customer-drawer";
 import { EmptyState } from "@/components/ui/empty-state";
+import { LiveSearch } from "@/components/ui/live-search";
 import { createServerSupabaseClient } from "@/lib/supabase";
 import { formatEtb } from "@/lib/utils";
 import { getDictionary } from "@/lib/i18n/server";
@@ -48,77 +48,61 @@ export default async function CustomersPage({
       </section>
 
       <section className="panel">
-        <form className="mb-4 grid gap-3 sm:grid-cols-[1fr_auto]" method="get">
-          <label className="field">
-            {t("cust_search")}
-            <span className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-              <input
-                className="input w-full pl-9"
-                defaultValue={params.search ?? ""}
-                name="search"
-                placeholder={t("cust_search_placeholder")}
-              />
-            </span>
-          </label>
-          <div className="flex items-end">
-            <button className="btn-secondary w-full" type="submit">
-              {t("cust_search")}
-            </button>
-          </div>
-        </form>
+        <div className="mb-4 max-w-md">
+          <LiveSearch
+            initialValue={params.search ?? ""}
+            label={t("cust_search")}
+            placeholder={t("cust_search_placeholder")}
+          />
+        </div>
 
         {filtered.length ? (
           <div className="overflow-hidden rounded-lg border border-line">
-            <div className="hidden table-head grid-cols-4 px-4 py-3 md:grid">
-              <span>{t("cust_name")}</span>
-              <span>{t("cust_business")}</span>
-              <span>{t("cust_phone")}</span>
-              <span>{t("cust_outstanding")}</span>
-            </div>
-            <div className="divide-y divide-line">
-              {filtered.map((customer) => (
-                <Link
-                  className="group grid gap-2 p-4 text-sm hover:bg-paper md:grid-cols-[1.2fr_1.2fr_1fr_1fr_auto]"
-                  href={`/customers/${customer.customer_id}`}
-                  key={customer.customer_id}
-                >
-                  <span className="flex items-center justify-between gap-3 md:block">
-                    <span className="text-[10px] font-semibold uppercase tracking-wide text-muted md:hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left text-sm">
+                <thead className="bg-paper text-muted">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold">
                       {t("cust_name")}
-                    </span>
-                    <span className="font-semibold">{customer.name}</span>
-                  </span>
-                  <span className="flex items-center justify-between gap-3 md:block">
-                    <span className="text-[10px] font-semibold uppercase tracking-wide text-muted md:hidden">
+                    </th>
+                    <th className="px-4 py-3 font-semibold">
                       {t("cust_business")}
-                    </span>
-                    <span>{customer.business_name || "-"}</span>
-                  </span>
-                  <span className="flex items-center justify-between gap-3 md:block">
-                    <span className="text-[10px] font-semibold uppercase tracking-wide text-muted md:hidden">
+                    </th>
+                    <th className="px-4 py-3 font-semibold">
                       {t("cust_phone")}
-                    </span>
-                    <span>{customer.phone || "-"}</span>
-                  </span>
-                  <span
-                    className={
-                      Number(customer.outstanding_balance) > 0
-                        ? "flex items-center justify-between gap-3 font-semibold text-danger md:block"
-                        : "flex items-center justify-between gap-3 font-semibold text-success md:block"
-                    }
-                  >
-                    <span className="text-[10px] font-semibold uppercase tracking-wide text-muted md:hidden">
-                      {t("cust_debt")}
-                    </span>
-                    <span>{formatEtb(customer.outstanding_balance)}</span>
-                  </span>
-                  <span className="inline-flex items-center justify-end gap-1 text-xs font-semibold text-brand-700">
-                    {t("cust_view_details")}
-                    <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                  </span>
-                </Link>
-              ))}
+                    </th>
+                    <th className="px-4 py-3 font-semibold">
+                      {t("cust_outstanding")}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((customer) => (
+                    <tr
+                      className="border-t border-line transition-colors hover:bg-paper"
+                      key={customer.customer_id}
+                    >
+                      <td className="px-4 py-3">
+                        <Link
+                          className="font-semibold text-brand-700"
+                          href={`/customers/${customer.customer_id}`}
+                        >
+                          {customer.name}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3">
+                        {customer.business_name || "-"}
+                      </td>
+                      <td className="px-4 py-3">{customer.phone || "-"}</td>
+                      <td
+                        className={`px-4 py-3 font-semibold ${Number(customer.outstanding_balance) > 0 ? "text-danger" : "text-success"}`}
+                      >
+                        {formatEtb(customer.outstanding_balance)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         ) : (

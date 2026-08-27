@@ -12,8 +12,6 @@ export type FormState = { ok: boolean; message: string } | null;
 const productSchema = z.object({
   id: z.string().uuid().optional(),
   name: z.string().min(1, "Product name is required"),
-  sku: z.string().optional(),
-  category: z.string().optional(),
   unit: z.string().min(1, "Unit is required"),
   purchase_price: z.number().min(0),
   selling_price: z.number().min(0),
@@ -102,8 +100,6 @@ export async function saveProduct(
   const parsed = productSchema.safeParse({
     id: String(formData.get("id") || "") || undefined,
     name: String(formData.get("name") ?? "").trim(),
-    sku: String(formData.get("sku") ?? "").trim(),
-    category: String(formData.get("category") ?? "").trim(),
     unit: String(formData.get("unit") || "piece").trim(),
     purchase_price: toNumber(formData.get("purchase_price")),
     selling_price: toNumber(formData.get("selling_price")),
@@ -119,8 +115,6 @@ export async function saveProduct(
       .from("products")
       .update({
         name: parsed.data.name,
-        sku: parsed.data.sku || null,
-        category: parsed.data.category || null,
         unit: parsed.data.unit,
         purchase_price: parsed.data.purchase_price,
         selling_price: parsed.data.selling_price,
@@ -132,8 +126,8 @@ export async function saveProduct(
   } else {
     const { error } = await supabase.rpc("create_product_with_stock", {
       p_name: parsed.data.name,
-      p_sku: parsed.data.sku || null,
-      p_category: parsed.data.category || null,
+      p_sku: null,
+      p_category: null,
       p_unit: parsed.data.unit,
       p_purchase_price: parsed.data.purchase_price,
       p_selling_price: parsed.data.selling_price,

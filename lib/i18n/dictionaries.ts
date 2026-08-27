@@ -8,6 +8,11 @@ export const dictionaries = {
     nav_customers: "Customers",
     nav_sales: "Sales",
     nav_payments: "Payments",
+    nav_home: "Home",
+    nav_stock: "Stock",
+    nav_clients: "Clients",
+    nav_sales_short: "Sales",
+    nav_payments_short: "Pay",
     nav_logout: "Logout",
 
     // Common Actions
@@ -52,8 +57,12 @@ export const dictionaries = {
     prod_quantity: "Quantity",
     prod_unit: "Unit",
     prod_purchase_price: "Purchase Price",
+    prod_purchase_price_help:
+      "This is the cost paid to buy the item before it is sold to a customer.",
     prod_selling_price: "Selling Price",
     prod_min_stock: "Min Stock",
+    prod_min_stock_help:
+      "Keep this low enough to warn you before stock runs out, without over-ordering.",
     prod_status: "Status",
     prod_in_stock: "In Stock",
     prod_low_stock: "Low Stock",
@@ -211,6 +220,11 @@ export const dictionaries = {
     nav_customers: "ደንበኞች",
     nav_sales: "ሽያጭ",
     nav_payments: "ክፍያዎች",
+    nav_home: "መነሻ",
+    nav_stock: "ክምችት",
+    nav_clients: "ደንበኞች",
+    nav_sales_short: "ሽያጭ",
+    nav_payments_short: "ክፍያ",
     nav_logout: "ውጣ",
 
     // Common Actions
@@ -255,8 +269,10 @@ export const dictionaries = {
     prod_quantity: "ብዛት",
     prod_unit: "መለኪያ",
     prod_purchase_price: "የመግዣ ዋጋ",
+    prod_purchase_price_help: "ይህ ምርቱን ከመግዛት በፊት የሚከፍሉት ዋጋ ነው።",
     prod_selling_price: "የመሸጫ ዋጋ",
     prod_min_stock: "አነስተኛ ክምችት መጠን",
+    prod_min_stock_help: "ይህን ዋጋ በቂ ክምችት እስከሚያልቅ ድረስ እንዲጠነቀቅ እና እንዳይበዛ ያግዛል።",
     prod_status: "ሁኔታ",
     prod_in_stock: "በክምችት አለ",
     prod_low_stock: "አነስተኛ ክምችት",
@@ -304,7 +320,8 @@ export const dictionaries = {
     // Sales
     sale_title: "ሽያጭ",
     sale_subtitle: "የሽያጭ፣ የክፍያ ሁኔታ እና የደንበኛ ዕዳን ይከታተሉ።",
-    sale_add_subtitle: "ሽያጭ ያከናውኑ፣ የክፍያ ሂደቱን ይመልከቱ እንዲሁም እያንዳንዱን መዝገብ በዝርዝር ይክፈቱ።",
+    sale_add_subtitle:
+      "ሽያጭ ያከናውኑ፣ የክፍያ ሂደቱን ይመልከቱ እንዲሁም እያንዳንዱን መዝገብ በዝርዝር ይክፈቱ።",
     sale_new: "አዲስ ሽያጭ",
     sale_view_details: "ዝርዝሮች ይመልከቱ",
     sale_select_customer: "ደንበኛ ምረጥ",

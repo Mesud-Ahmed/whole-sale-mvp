@@ -15,37 +15,37 @@ import { DictionaryKey } from "@/lib/i18n/dictionaries";
 const navItems: {
   href: string;
   labelKey: DictionaryKey;
-  mobileLabel: string;
+  mobileLabelKey: DictionaryKey;
   icon: "dashboard" | "products" | "customers" | "sales" | "payments";
 }[] = [
   {
     href: "/dashboard",
     labelKey: "nav_dashboard",
-    mobileLabel: "Home",
+    mobileLabelKey: "nav_home",
     icon: "dashboard",
   },
   {
     href: "/products",
     labelKey: "nav_products",
-    mobileLabel: "Stock",
+    mobileLabelKey: "nav_stock",
     icon: "products",
   },
   {
     href: "/customers",
     labelKey: "nav_customers",
-    mobileLabel: "Clients",
+    mobileLabelKey: "nav_clients",
     icon: "customers",
   },
   {
     href: "/sales",
     labelKey: "nav_sales",
-    mobileLabel: "Sales",
+    mobileLabelKey: "nav_sales_short",
     icon: "sales",
   },
   {
     href: "/payments",
     labelKey: "nav_payments",
-    mobileLabel: "Pay",
+    mobileLabelKey: "nav_payments_short",
     icon: "payments",
   },
 ];
@@ -71,6 +71,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   const desktopNavItems = navItems.map((item) => ({
     ...item,
     label: t(item.labelKey),
+    mobileLabel: t(item.mobileLabelKey),
   }));
 
   return (
@@ -140,7 +141,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
                 width={32}
               />
             </div>
-            <span></span>
+            <span>ነጋዴ ERP</span>
           </Link>
           <div className="flex items-center gap-2">
             <div className="w-24">
@@ -156,6 +157,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
           items={navItems.map((item) => ({
             ...item,
             label: t(item.labelKey),
+            mobileLabel: t(item.mobileLabelKey),
           }))}
           variant="mobile"
         />
