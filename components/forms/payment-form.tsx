@@ -36,22 +36,22 @@ export function PaymentForm({
   const visibleSales = openSales.filter((sale) => !customerId || sale.customer_id === customerId);
 
   return (
-    <form action={formAction} className="grid gap-3 sm:grid-cols-2" id="record-payment">
-      <label className="field">
+    <form action={formAction} className="grid gap-3 w-full max-w-full min-w-0 sm:grid-cols-2" id="record-payment">
+      <label className="field w-full min-w-0">
         {t("sale_customer_filter")}
-        <select className="input" name="customer_id" onChange={(event) => setCustomerId(event.target.value)} required value={customerId}>
+        <select className="input w-full min-w-0 truncate" name="customer_id" onChange={(event) => setCustomerId(event.target.value)} required value={customerId}>
           <option value="">{t("pay_select_customer")}</option>
           {customers.map((customer) => (
             <option key={customer.customer_id} value={customer.customer_id}>
-              {customer.name} {customer.business_name ? `- ${customer.business_name}` : ""} ({customer.outstanding_balance} ETB)
+              {customer.name} ({customer.outstanding_balance} ETB)
             </option>
           ))}
         </select>
       </label>
 
-      <label className="field">
+      <label className="field w-full min-w-0">
         {t("sale_title")}
-        <select className="input" name="sale_id">
+        <select className="input w-full min-w-0 truncate" name="sale_id">
           <option value="">{t("pay_oldest_first")}</option>
           {visibleSales.map((sale) => (
             <option key={sale.sale_id} value={sale.sale_id}>
@@ -61,22 +61,22 @@ export function PaymentForm({
         </select>
       </label>
 
-      <label className="field">
+      <label className="field w-full min-w-0">
         {t("pay_amount")}
-        <input className="input" min="0.01" name="amount" required step="0.01" type="number" />
+        <input className="input w-full min-w-0" min="0.01" name="amount" required step="0.01" type="number" />
       </label>
 
-      <label className="field">
+      <label className="field w-full min-w-0">
         {t("pay_date")}
-        <input className="input" defaultValue={today} name="payment_date" required type="date" />
+        <input className="input w-full min-w-0" defaultValue={today} name="payment_date" required type="date" />
       </label>
 
-      <label className="field sm:col-span-2">
+      <label className="field w-full min-w-0 sm:col-span-2">
         {t("pay_notes")}
-        <textarea className="textarea" name="note" placeholder={t("pay_note_placeholder")} />
+        <textarea className="textarea w-full min-w-0" name="note" placeholder={t("pay_note_placeholder")} />
       </label>
 
-      <div className="flex items-center gap-3 sm:col-span-2">
+      <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
         <SubmitButton>{t("pay_record")}</SubmitButton>
         <FormMessage state={state} />
       </div>

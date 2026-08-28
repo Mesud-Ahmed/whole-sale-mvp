@@ -18,37 +18,37 @@ const navItems: {
   mobileLabelKey: DictionaryKey;
   icon: "dashboard" | "products" | "customers" | "sales" | "payments";
 }[] = [
-  {
-    href: "/dashboard",
-    labelKey: "nav_dashboard",
-    mobileLabelKey: "nav_home",
-    icon: "dashboard",
-  },
-  {
-    href: "/products",
-    labelKey: "nav_products",
-    mobileLabelKey: "nav_stock",
-    icon: "products",
-  },
-  {
-    href: "/customers",
-    labelKey: "nav_customers",
-    mobileLabelKey: "nav_clients",
-    icon: "customers",
-  },
-  {
-    href: "/sales",
-    labelKey: "nav_sales",
-    mobileLabelKey: "nav_sales_short",
-    icon: "sales",
-  },
-  {
-    href: "/payments",
-    labelKey: "nav_payments",
-    mobileLabelKey: "nav_payments_short",
-    icon: "payments",
-  },
-];
+    {
+      href: "/dashboard",
+      labelKey: "nav_dashboard",
+      mobileLabelKey: "nav_home",
+      icon: "dashboard",
+    },
+    {
+      href: "/products",
+      labelKey: "nav_products",
+      mobileLabelKey: "nav_stock",
+      icon: "products",
+    },
+    {
+      href: "/customers",
+      labelKey: "nav_customers",
+      mobileLabelKey: "nav_clients",
+      icon: "customers",
+    },
+    {
+      href: "/sales",
+      labelKey: "nav_sales",
+      mobileLabelKey: "nav_sales_short",
+      icon: "sales",
+    },
+    {
+      href: "/payments",
+      labelKey: "nav_payments",
+      mobileLabelKey: "nav_payments_short",
+      icon: "payments",
+    },
+  ];
 
 const quickActions: { href: string; labelKey: DictionaryKey }[] = [
   { href: "/products#add-product", labelKey: "prod_add" },
@@ -108,7 +108,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
               href={action.href}
               key={action.href}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4" /> <p>New sale</p>
               {t(action.labelKey)}
             </Link>
           ))}
@@ -149,7 +149,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
             </div>
             <Link className="btn-primary h-9 px-2.5 sm:px-3 text-xs sm:text-sm" href="/sales/new">
               <Plus className="h-4 w-4 shrink-0" />
-              <span className="hidden xs:inline">{t("sale_new")}</span>
+              <span>{t("sale_new")}</span>
             </Link>
             <form action={signOut}>
               <button
